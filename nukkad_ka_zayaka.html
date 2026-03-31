@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nukkad Ka Zayaka - Bhukkad</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Tiro+Devanagari+Hindi:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #100500;
+    --primary: #ff6a00;
+    --primary-dim: rgba(255, 106, 0, 0.2);
+    --text-main: #ffffff;
+    --text-muted: #ff6a00aa;
+    --bg-card: #1a0b00;
+    --veg-color: #2aff6e;
+    --nonveg-color: #ff3b3b;
+    --transition-smooth: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: var(--bg-dark);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+    padding-bottom: 5rem;
+  }
+
+  /* --- Top Bar & Map Pin Animation --- */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(16, 5, 0, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--primary-dim);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .address-container {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    overflow: hidden; /* For smooth reveal */
+  }
+
+  .map-pin {
+    font-size: 1.5rem;
+    color: var(--primary);
+    animation: bouncePin 1.5s infinite ease-in-out;
+    filter: drop-shadow(0 0 10px rgba(255,106,0,0.5));
+  }
+
+  @keyframes bouncePin {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.1); }
+  }
+
+  .address-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .address-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .address-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-15px);
+    animation: slideFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  }
+
+  @keyframes slideFadeIn {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .profile-btn {
+    background: var(--primary-dim);
+    border: 1px solid rgba(255,106,0,0.3);
+    color: var(--primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .profile-btn:hover { background: var(--primary); color: #000; }
+
+  /* --- Page Header --- */
+  .header-section {
+    padding: 2rem 1.5rem 1rem;
+    text-align: left;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    letter-spacing: 2px;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 30px rgba(255, 106, 0, 0.3);
+  }
+
+  .page-subtitle {
+    font-family: 'Tiro Devanagari Hindi', serif;
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    margin-bottom: 1.5rem;
+  }
+
+  /* --- Search Bar --- */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .search-input {
+    width: 100%;
+    background: rgba(255, 106, 0, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.2);
+    padding: 1rem 1.2rem 1rem 3rem;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  
+  .search-input:focus {
+    background: rgba(255, 106, 0, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(255, 106, 0, 0.15);
+  }
+
+  .search-input::placeholder { color: rgba(255,255,255,0.4); }
+
+  .search-icon {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 1.2rem;
+    pointer-events: none;
+  }
+
+  /* --- Veg/Non-Veg Slider --- */
+  .filter-slider-container {
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--primary-dim);
+    border-radius: 30px;
+    padding: 4px;
+    position: relative;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .slider-option {
+    flex: 1;
+    text-align: center;
+    padding: 0.6rem 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+    transition: color 0.3s ease;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .slider-option.active { color: #fff; }
+
+  /* Dynamic Active Pill */
+  .slider-active-pill {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    width: calc(33.333% - 4px);
+    background: var(--primary);
+    border-radius: 26px;
+    z-index: 1;
+    transition: transform var(--transition-smooth), background var(--transition-smooth);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  /* State colors for the pill */
+  .state-all { background: var(--primary); box-shadow: 0 0 15px var(--primary-dim); }
+  .state-veg { background: var(--veg-color); box-shadow: 0 0 15px rgba(42, 255, 110, 0.2); }
+  .state-nonveg { background: var(--nonveg-color); box-shadow: 0 0 15px rgba(255, 59, 59, 0.2); }
+
+  /* --- Stall List --- */
+  .stall-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 0 1.5rem;
+  }
+
+  .stall-card {
+    background: var(--bg-card);
+    border: 1px solid var(--primary-dim);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s ease forwards;
+  }
+
+  .stall-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px var(--primary-dim);
+    border-color: rgba(255, 106, 0, 0.5);
+  }
+
+  @keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stall-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--primary);
+    position: relative;
+  }
+
+  .stall-info {
+    padding: 1.2rem;
+  }
+
+  .stall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  .stall-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+
+  .stall-rating {
+    background: rgba(255, 106, 0, 0.15);
+    color: var(--primary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .stall-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+
+  .stall-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stall-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  
+  .tag-veg { background: rgba(42, 255, 110, 0.1); color: var(--veg-color); border: 1px solid rgba(42, 255, 110, 0.3); }
+  .tag-nonveg { background: rgba(255, 59, 59, 0.1); color: var(--nonveg-color); border: 1px solid rgba(255, 59, 59, 0.3); }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: rgba(255,255,255,0.4);
+    grid-column: 1 / -1;
+  }
+
+  .admin-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    color: #ffb300;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid #ffb300;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  /* --- Cross Sell Banner --- */
+  .cross-sell-banner {
+    margin: 1rem 1.5rem 0;
+    background: linear-gradient(135deg, rgba(42, 255, 110, 0.1), rgba(0, 18, 8, 0.8));
+    border: 1px solid rgba(42, 255, 110, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cross-sell-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(42, 255, 110, 0.15);
+  }
+  .cross-icon { font-size: 2rem; }
+
+  /* --- Address Modal --- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  
+  .address-modal {
+    position: fixed; bottom: -100%; left: 0; right: 0;
+    background: var(--bg-card); border-top: 1px solid var(--primary);
+    border-radius: 20px 20px 0 0; z-index: 1000; padding: 2rem;
+    transition: bottom 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 -10px 40px rgba(255,106,0,0.2);
+  }
+  .address-modal.show { bottom: 0; }
+  
+  .modal-drag { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; margin: 0 auto 1.5rem; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--primary); letter-spacing: 1px; margin-bottom: 1.5rem; }
+  
+  .location-btn {
+    width: 100%; padding: 1rem; background: rgba(255,106,0,0.1); border: 1px solid var(--primary); color: var(--primary);
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
+    margin-bottom: 1rem;
+  }
+  .location-btn:hover { background: var(--primary); color: #000; }
+  
+  .manual-address {
+    width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem; border-radius: 8px; color: #fff; outline: none; transition: border-color 0.2s;
+    margin-bottom: 1rem; font-family: 'DM Sans', sans-serif;
+  }
+  .manual-address:focus { border-color: var(--primary); }
+  
+  .close-modal {
+    position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; font-size: 1.5rem; color: #fff; cursor: pointer;
+  }
+
+  /* --- Footer --- */
+  .app-footer {
+    background: rgba(0,0,0,0.6);
+    border-top: 1px solid var(--primary-dim);
+    padding: 3rem 1.5rem 2rem;
+    margin-top: 3rem;
+    text-align: center;
+  }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--primary); letter-spacing: 2px; line-height: 1; margin-bottom: 0.2rem; }
+  .footer-iso { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2rem; }
+  
+  .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+  .footer-link { color: #fff; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .footer-link:hover { color: var(--primary); }
+
+  .app-coming-soon { 
+    background: rgba(255,255,255,0.02); border: 1px dashed var(--primary); 
+    border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; 
+  }
+  .app-coming-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--primary); letter-spacing: 1px; margin-bottom: 1rem; }
+  .store-badges { display: flex; justify-content: center; gap: 1rem; }
+  .store-badge { 
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; 
+    padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.4rem; color: #fff;
+    font-size: 0.8rem; font-weight: bold; opacity: 0.7;
+  }
+  
+  .footer-bottom { 
+    font-size: 0.8rem; color: rgba(255,255,255,0.4); 
+    border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; 
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Delivery Address Bar -->
+  <div class="top-bar">
+    <div class="address-container" onclick="openAddressModal()">
+      <div class="map-pin">📍</div>
+      <div class="address-text-wrapper">
+        <span class="address-label">Delivering To</span>
+        <!-- This value animates in on load -->
+        <span class="address-value" id="topAddressValue">Home - 41, Indrapuri Sector A, Indore... ▾</span>
+      </div>
+    </div>
+    <div class="profile-btn">👤</div>
+  </div>
+
+  <!-- Cross Sell Banner -->
+  <div class="cross-sell-banner" onclick="window.location.href='ghar_ka_khana.html'">
+    <div class="cross-icon">🍱</div>
+    <div class="cross-text">
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">Craving Home Food?</div>
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:1px; color:#2aff6e;">Switch to Ghar Ka Khana →</div>
+    </div>
+  </div>
+
+  <div class="header-section">
+    <h1 class="page-title">NUKKAD KA ZAYKA</h1>
+    <p class="page-subtitle">Hawkers, thele aur chaat corners ka swad...</p>
+
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search for golgappe, kebabs, stalls...">
+    </div>
+
+    <!-- Veg / Non-Veg Slider -->
+    <div class="filter-slider-container">
+      <div class="slider-active-pill state-all" id="activePill"></div>
+      <div class="slider-option active" data-filter="all" onclick="setFilter('all', 0)">ALL</div>
+      <div class="slider-option" data-filter="veg" onclick="setFilter('veg', 1)">VEG</div>
+      <div class="slider-option" data-filter="nonveg" onclick="setFilter('nonveg', 2)">NON-VEG</div>
+    </div>
+  </div>
+
+  <!-- Stall List Container -->
+  <div class="stall-list" id="stallList">
+    <!-- Rendered via JS -->
+  </div>
+
+  <!-- Address Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeAddressModal()"></div>
+  <div class="address-modal" id="addressModal">
+    <button class="close-modal" onclick="closeAddressModal()">✕</button>
+    <div class="modal-drag"></div>
+    <div class="modal-title">SELECT DELIVERY LOCATION</div>
+    <input type="text" id="newAddressInput" class="manual-address" placeholder="e.g. 42 Wallaby Way, Sydney">
+    <button class="location-btn" style="background:#fff; color:#000; border:none;" onclick="saveManualAddress()">Save Address</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-logo">BHUKKAD</div>
+    <div class="footer-iso">An ISO 9001:2015 Certified Platform</div>
+    
+    <div class="footer-links">
+      <a href="#" class="footer-link">About Us</a>
+      <a href="#" class="footer-link">Contact</a>
+      <a href="#" class="footer-link">Terms & Conditions</a>
+      <a href="#" class="footer-link">Privacy Policy</a>
+      <a href="#" class="footer-link">Refund Policy</a>
+    </div>
+
+    <div class="app-coming-soon">
+      <div class="app-coming-title">MOBILE APP COMING SOON</div>
+      <p style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-bottom:1rem;">We're working hard to bring the Bhukkad experience to your home screen.</p>
+      <div class="store-badges">
+        <div class="store-badge">🍏 App Store</div>
+        <div class="store-badge">▶️ Google Play</div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      &copy; 2026 Bhukkad Technologies. Made with ❤️ in India.
+    </div>
+  </footer>
+
+  <script>
+    // --- Mock Data & LocalStorage Init ---
+    const initialStalls = [
+      {
+        id: 1,
+        name: "Sharma Ji Chaat Bhandar",
+        rating: 4.8,
+        desc: "Famous for spicy pani puri & crispy aloo tikki. A true local gem.",
+        type: "veg",
+        isAdminApproved: true,
+        image: "img/pani_puri_stall.png"
+      },
+      {
+        id: 2,
+        name: "Ramu Kebab Corner",
+        rating: 4.5,
+        desc: "Sizzling hot seekh kebabs and smoky tikka straight from the grill.",
+        type: "nonveg",
+        isAdminApproved: true,
+        image: "img/kebab_grill.png"
+      },
+      {
+        id: 3,
+        name: "Bhaiya Ji Kachori",
+        rating: 4.2,
+        desc: "Crispy, flaky kachoris served with tangy tamarind chutney.",
+        type: "veg",
+        isAdminApproved: true,
+        image: "img/kachori.png"
+      },
+      {
+        id: 4,
+        name: "Unverified Local Stall",
+        rating: 3.5,
+        desc: "Pending food hygiene checks.",
+        type: "veg",
+        isAdminApproved: false,
+        image: "img/pani_puri_stall.png"
+      },
+      {
+        id: 5,
+        name: "Delhi Chicken Tikka",
+        rating: 4.0,
+        desc: "Not officially verified by your admin dashboard yet.",
+        type: "nonveg",
+        isAdminApproved: false,
+        image: "img/kebab_grill.png"
+      }
+    ];
+
+    try {
+      if (!localStorage.getItem('bhukkad_stalls')) {
+        localStorage.setItem('bhukkad_stalls', JSON.stringify(initialStalls));
+      }
+    } catch(e) { console.warn('LocalStorage unavailable'); }
+
+    // Always fetch from localStorage so new additions from Admin show immediately!
+    let mockStalls = [];
+    try {
+       mockStalls = JSON.parse(localStorage.getItem('bhukkad_stalls')) || [];
+    } catch(e) {
+       mockStalls = initialStalls;
+    }
+
+    let currentFilter = 'all'; // 'all', 'veg', 'nonveg'
+    let searchQuery = '';
+
+
+    // --- Filter Slider Logic ---
+    function setFilter(filterType, index) {
+      currentFilter = filterType;
+      
+      // Move the active pill
+      const pill = document.getElementById('activePill');
+      const offset = index * 100; // Since there are 3 items, 100% of its own width
+      pill.style.transform = `translateX(${offset}%)`;
+
+      // Update Pill Color State
+      pill.className = 'slider-active-pill'; // Reset classes
+      if (filterType === 'all') pill.classList.add('state-all');
+      else if (filterType === 'veg') pill.classList.add('state-veg');
+      else if (filterType === 'nonveg') pill.classList.add('state-nonveg');
+
+      // Update text colors
+      document.querySelectorAll('.slider-option').forEach(opt => opt.classList.remove('active'));
+      const activeOpt = document.querySelector(`.slider-option[data-filter="${filterType}"]`);
+      if (activeOpt) activeOpt.classList.add('active');
+
+      renderStalls();
+    }
+
+    // --- Search Logic ---
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase();
+      renderStalls();
+    });
+
+    // --- Render Logic ---
+    function renderStalls() {
+      const container = document.getElementById('stallList');
+      container.innerHTML = '';
+
+      // 1. MUST FILTER ONLY ADMIN APPROVED STALLS
+      let filtered = mockStalls.filter(stall => stall.isAdminApproved === true);
+
+      // 2. Filter by search query
+      if (searchQuery) {
+        filtered = filtered.filter(stall => 
+          stall.name.toLowerCase().includes(searchQuery) ||
+          stall.desc.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      // 3. Filter by slider type (Veg/Non-veg)
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(stall => stall.type === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🥺</div>
+            <h3>No approved stalls found</h3>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">Try adjusting your search or filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach((stall, i) => {
+        // Tag styling
+        const isVeg = stall.type === 'veg';
+        const tagClass = isVeg ? 'tag-veg' : 'tag-nonveg';
+        const tagText = isVeg ? '🟢 Pure Veg' : '🔴 Non-Veg';
+        
+        // Staggered animation delay
+        const animDelay = i * 0.1;
+
+        const card = document.createElement('div');
+        card.className = 'stall-card';
+        card.style.animationDelay = `${animDelay}s`;
+        
+        card.innerHTML = `
+          <div style="position: relative;" onclick="window.location.href='cart.html?id=' + stall.id + '&platform=' + (stall._platform || 'nukkad') + '&name=' + encodeURIComponent(stall.name)">
+            <img src="${stall.image}" alt="${stall.name}" class="stall-image" onerror="this.src='https://via.placeholder.com/400x300/100500/ff6a00?text=No+Image';">
+          </div>
+          <div class="stall-info">
+            <div class="stall-header">
+              <h3 class="stall-name">${stall.name}</h3>
+              <div class="stall-rating">★ ${stall.rating}</div>
+            </div>
+            <p class="stall-desc">${stall.desc}</p>
+            <div class="stall-tags">
+              <span class="stall-tag ${tagClass}">${tagText}</span>
+              ${stall.type === 'veg' ? '<span class="stall-tag" style="background:rgba(255,255,255,0.1); color:#fff;">Snacks</span>' : '<span class="stall-tag" style="background:rgba(255,255,255,0.1); color:#fff;">Grill</span>'}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Initial render
+    renderStalls();
+
+    // --- Address Modal Logic ---
+    function openAddressModal() {
+      document.getElementById('modalOverlay').classList.add('show');
+      document.getElementById('addressModal').classList.add('show');
+    }
+
+    function closeAddressModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+      document.getElementById('addressModal').classList.remove('show');
+    }
+    
+    function updateAddressUI(newAddr) {
+      document.getElementById('topAddressValue').innerText = newAddr + ' ▾';
+      closeAddressModal();
+    }
+
+    function scanLiveAddress() {
+      const btn = document.getElementById('liveLocBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳</span> Scanning...';
+      
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          // Formatting realistic looking location instead of raw coordinates
+          setTimeout(() => {
+            updateAddressUI('Scanned Location: Indore Sector A');
+            btn.innerHTML = originalText;
+          }, 800);
+        }, (error) => {
+          alert("Location access denied or unavailable.");
+          btn.innerHTML = originalText;
+        });
+      } else {
+        alert("Geolocation not supported by this browser.");
+        btn.innerHTML = originalText;
+      }
+    }
+
+    function saveManualAddress() {
+      const val = document.getElementById('newAddressInput').value.trim();
+      if(val) {
+        updateAddressUI(val);
+        document.getElementById('newAddressInput').value = '';
+      } else {
+        alert("Please enter a valid address!");
+      }
+    }
+  </script>
+</body>
+</html>

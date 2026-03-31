@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout - Bhukkad</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#0f0a00;font-family:'DM Sans',sans-serif; color:#fff;}
+
+/* Navbar */
+.navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 2rem; border-bottom: 1px solid rgba(255,106,0,0.2);
+  background: rgba(15,10,0,0.9); position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #ff6a00; text-decoration: none; letter-spacing: 2px;}
+
+.container {
+  max-width: 1000px; margin: 2rem auto; padding: 0 1rem;
+  display: grid; grid-template-columns: 1fr 400px; gap: 2rem;
+}
+@media(max-width: 800px) {
+  .container { grid-template-columns: 1fr; }
+}
+
+.section-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #ff6a00;
+  letter-spacing: 1px; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,106,0,0.2);
+  padding-bottom: 0.5rem;
+}
+
+/* Left Grid */
+.left-col { display: flex; flex-direction: column; gap: 2rem; }
+
+.panel {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,106,0,0.15);
+  border-radius: 12px; padding: 1.5rem;
+}
+
+/* Items */
+.cart-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 0; border-bottom: 1px dashed rgba(255,255,255,0.1);
+}
+.cart-item:last-child { border-bottom: none; }
+.item-info { flex: 1; }
+.item-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.2rem; }
+.item-price { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+.qty-controls {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,106,0,0.1); border-radius: 6px; padding: 0.2rem;
+  border: 1px solid rgba(255,106,0,0.3);
+}
+.qty-btn {
+  background: transparent; color: #ff6a00; border: none; font-size: 1.2rem;
+  cursor: pointer; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center;
+}
+.qty-val { font-weight: bold; width: 20px; text-align: center; font-size: 0.9rem; }
+
+/* Distance Simulation */
+.distance-slider-wrap {
+  display: flex; flex-direction: column; gap: 1rem; padding-top: 1rem;
+}
+.slider-info {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.distance-range {
+  -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.2); outline: none;
+}
+.distance-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: #ff6a00; cursor: pointer;
+  box-shadow: 0 0 10px rgba(255,106,0,0.5);
+}
+.del-rule { font-size: 0.8rem; color: #2aff6e; font-weight: bold; margin-top: 0.5rem; }
+
+/* Payment Options */
+.pay-option {
+  display: flex; align-items: center; gap: 1rem; padding: 1rem;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  margin-bottom: 1rem; cursor: pointer; transition: 0.3s;
+}
+.pay-option:hover { background: rgba(255,255,255,0.05); }
+.pay-option.selected { border-color: #ff6a00; background: rgba(255,106,0,0.1); }
+.pay-radio {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ff6a00;
+  display: flex; align-items: center; justify-content: center;
+}
+.pay-radio::after {
+  content: ''; width: 10px; height: 10px; background: #ff6a00; border-radius: 50%;
+  opacity: 0; transition: 0.2s;
+}
+.pay-option.selected .pay-radio::after { opacity: 1; }
+.pay-name { font-weight: 700; font-size: 1.1rem; }
+.pay-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;}
+
+/* Bill Summary */
+.bill-row {
+  display: flex; justify-content: space-between; margin-bottom: 0.8rem;
+  color: rgba(255,255,255,0.8); font-size: 1rem;
+}
+.bill-row.discount { color: #2aff6e; }
+.bill-row.total {
+  border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 1rem; margin-top: 0.5rem;
+  font-weight: 700; font-size: 1.3rem; color: #fff;
+}
+.btn {
+  width: 100%; padding: 1.2rem; background: #ff6a00; color: #000; border: none; border-radius: 8px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 2px; cursor: pointer;
+  transition: transform 0.2s, background 0.2s; margin-top: 1.5rem;
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(255,106,0,0.3); }
+
+/* Success Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.success-box {
+  background: #110800; border: 1px solid #2aff6e; padding: 3rem 2rem; border-radius: 16px;
+  width: 90%; max-width: 400px; text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popIn { 0%{opacity:0; transform:scale(0.8);} 100%{opacity:1; transform:scale(1);} }
+.success-icon { font-size: 4rem; margin-bottom: 1rem; color: #2aff6e; }
+
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <button onclick="window.history.back()" style="background:transparent; border:none; color:#ff6a00; font-size:1.5rem; cursor:pointer;">←</button>
+    <a href="landingpage.html" class="logo">BHUKKAD</a>
+  </div>
+</nav>
+
+<div class="container">
+  
+  <div class="left-col">
+    <!-- Simulated Cart Items -->
+    <div class="panel">
+      <h2 class="section-title">Your Order (<span id="storeNameMock">Raju Chaat Center</span>)</h2>
+      <div id="cartItemsContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Distance / Delivery Address Simulation -->
+    <div class="panel">
+      <h2 class="section-title">Delivery Details</h2>
+      <div class="distance-slider-wrap">
+        <label style="color:#ff6a00aa; font-weight:bold; font-size:0.85rem; text-transform:uppercase;">Distance to destination</label>
+        <div class="slider-info">
+          <span style="font-size:1.5rem; font-weight:700;"><span id="distVal">2.5</span> km</span>
+          <span class="del-rule">Free up to 3km! Then ₹10/km</span>
+        </div>
+        <input type="range" id="distSlider" class="distance-range" min="0.5" max="15.0" step="0.5" value="2.5" oninput="updateDistance()">
+      </div>
+    </div>
+
+    <!-- Payment Options -->
+    <div class="panel">
+      <h2 class="section-title">Payment Method</h2>
+      
+      <div class="pay-option selected" id="optOnline" onclick="selectPayment('online')">
+        <div class="pay-radio"></div>
+        <div>
+          <div class="pay-name">Online Payment</div>
+          <div class="pay-desc">Pay securely via UPI, Credit or Debit Card</div>
+        </div>
+      </div>
+      
+      <div class="pay-option" id="optCod" onclick="selectPayment('cod')">
+        <div class="pay-radio"></div>
+        <div>
+          <div class="pay-name">Cash On Delivery</div>
+          <div class="pay-desc">Pay at your doorstep</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <!-- Bill Details -->
+    <div class="panel" style="position: sticky; top: 100px;">
+      <h2 class="section-title" style="margin-bottom: 1rem;">Bill Summary</h2>
+      
+      <div class="bill-row">
+        <span>Item Total</span>
+        <span>₹<span id="billSubtotal">0</span></span>
+      </div>
+      <div class="bill-row discount">
+        <span>Bhukkad Discount (25%)</span>
+        <span>- ₹<span id="billDiscount">0</span></span>
+      </div>
+      <div class="bill-row">
+        <span>Delivery Fee (<span id="billDist">2.5</span>km)</span>
+        <span>₹<span id="billDelivery">0</span></span>
+      </div>
+      
+      <div class="bill-row total">
+        <span>Grand Total</span>
+        <span>₹<span id="billTotal">0</span></span>
+      </div>
+
+      <button class="btn" onclick="placeOrder()">PLACE ORDER</button>
+      <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); text-align:center; margin-top:1rem;">
+        By placing your order, you agree to Bhukkad's Terms of Use
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="success-box">
+    <div class="success-icon">✓</div>
+    <h2 style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#2aff6e; letter-spacing:2px; margin-bottom:0.5rem;">ORDER PLACED!</h2>
+    <p style="color:rgba(255,255,255,0.7); margin-bottom:2rem;">Your food is being prepared. Our delivery partner will pick it up soon.</p>
+    <button class="btn" style="background:#2aff6e; color:#000;" onclick="window.location.href='landingpage.html'">RETURN HOME</button>
+  </div>
+</div>
+
+<script>
+  let cartItems = [];
+  let selectedPayment = 'online';
+  let distanceKm = 2.5;
+
+  function renderCart() {
+    const container = document.getElementById('cartItemsContainer');
+    container.innerHTML = '';
+    
+    cartItems.forEach((item, index) => {
+      container.innerHTML += `
+        <div class="cart-item">
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-price">₹${item.price}</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateQty(${index}, -1)">−</button>
+            <div class="qty-val">${item.qty}</div>
+            <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+          </div>
+        </div>
+      `;
+    });
+    
+    calculateBill();
+  }
+
+  function updateQty(index, delta) {
+    if (cartItems[index].qty + delta >= 0) {
+      cartItems[index].qty += delta;
+    }
+    renderCart();
+  }
+
+  function updateDistance() {
+    distanceKm = parseFloat(document.getElementById('distSlider').value);
+    document.getElementById('distVal').innerText = distanceKm.toFixed(1);
+    document.getElementById('billDist').innerText = distanceKm.toFixed(1);
+    calculateBill();
+  }
+
+  function selectPayment(method) {
+    selectedPayment = method;
+    document.getElementById('optOnline').classList.toggle('selected', method === 'online');
+    document.getElementById('optCod').classList.toggle('selected', method === 'cod');
+  }
+
+  function calculateBill() {
+    let subtotal = 0;
+    cartItems.forEach(item => {
+      subtotal += item.price * item.qty;
+    });
+
+    if (cartItems.length === 0) subtotal = 0;
+
+    // 25% Discount Flat
+    let discount = 0;
+    if (subtotal > 0) {
+      discount = subtotal * 0.25;
+    }
+
+    // Delivery Fee Logic: Free upto 3km, 10 rs/km after.
+    let deliveryFee = 0;
+    if (distanceKm > 3 && subtotal > 0) {
+      let extraKm = distanceKm - 3;
+      deliveryFee = Math.ceil(extraKm) * 10;
+    }
+
+    let total = subtotal - discount + deliveryFee;
+
+    // DOM Updates
+    document.getElementById('billSubtotal').innerText = Math.round(subtotal);
+    document.getElementById('billDiscount').innerText = Math.round(discount);
+    document.getElementById('billDelivery').innerText = deliveryFee === 0 ? 'FREE' : Math.round(deliveryFee);
+    document.getElementById('billTotal').innerText = Math.round(total);
+  }
+
+  function placeOrder() {
+    let hasItems = cartItems.some(i => i.qty > 0);
+    if (!hasItems) return alert("Your cart is empty! Please add some items.");
+    document.getElementById('successModal').classList.add('active');
+  }
+
+  // Fetch Vendor Menu dynamically from URL params
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    const storeName = params.get('name');
+    const storeId = params.get('id');
+    const platform = params.get('platform');
+    
+    if(storeName) {
+      document.getElementById('storeNameMock').innerText = decodeURIComponent(storeName);
+    }
+
+    // Try finding the stall in database
+    let dbKey = platform === 'ghar' ? 'bhukkad_home_stalls' : 'bhukkad_stalls';
+    let data = [];
+    try { data = JSON.parse(localStorage.getItem(dbKey)) || []; } catch(e){}
+
+    const stall = data.find(s => s.id == storeId);
+
+    // If stall has custom menu items, load those. Otherwise default mock. 
+    if (stall && stall.menuItems && stall.menuItems.length > 0) {
+      cartItems = stall.menuItems.map(m => ({ ...m, qty: 0 }));
+    } else {
+      cartItems = [
+        { id: 1, name: "Paneer Tikka (Default Mock)", price: 180, qty: 0 },
+        { id: 2, name: "Aloo Paratha", price: 60, qty: 0 }
+      ];
+    }
+
+    renderCart();
+  };
+
+</script>
+</body>
+</html>

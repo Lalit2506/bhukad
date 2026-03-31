@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Partner Dashboard - Bhukkad</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #0f0a00;
+    --primary: #ff6a00;
+    --primary-dim: rgba(255, 106, 0, 0.2);
+    --text-main: #ffffff;
+    --text-muted: #ff6a00aa;
+    --bg-card: #1a0b00;
+    --success: #2aff6e;
+    --danger: #ff3b3b;
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: var(--bg-dark);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  .admin-header {
+    background: #1a0b00;
+    border-bottom: 2px solid var(--primary);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .admin-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--primary);
+    letter-spacing: 2px;
+  }
+
+  .nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { border-color: var(--primary); color: var(--primary); }
+
+  .dashboard-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .welcome-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--primary-dim);
+  }
+
+  .welcome-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+  .welcome-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+  }
+
+  /* Status Toggle */
+  .status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(0,0,0,0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    border: 1px solid var(--border-color);
+  }
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--danger);
+    box-shadow: 0 0 10px var(--danger);
+    transition: all 0.3s;
+  }
+  .status-dot.online {
+    background: var(--success);
+    box-shadow: 0 0 10px var(--success);
+  }
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #333;
+    transition: .4s; border-radius: 34px;
+  }
+  .slider:before {
+    position: absolute; content: "";
+    height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s; border-radius: 50%;
+  }
+  input:checked + .slider { background-color: var(--success); }
+  input:checked + .slider:before { transform: translateX(20px); }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  @media(max-width: 600px) {
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+  .stat-card {
+    background: linear-gradient(135deg, rgba(255,106,0,0.1), rgba(0,0,0,0));
+    border: 1px solid var(--primary-dim);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--primary);
+  }
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+
+  /* Orders Section */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+  }
+
+  .order-card {
+    background: var(--bg-card);
+    border: 1px solid var(--primary-dim);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+  }
+  .order-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+  }
+  .order-details { flex: 1; }
+  .order-id { font-weight: 700; color: var(--primary); margin-bottom: 0.3rem;}
+  .order-route { font-size: 0.9rem; color: #ccc; margin-bottom: 0.5rem; }
+  .order-distance { display: inline-block; background: rgba(255,255,255,0.1); padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem;}
+
+  .btn {
+    padding: 0.8rem 1.5rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-accept { background: var(--success); color: #000; }
+  .btn-accept:hover { filter: brightness(1.2); }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.4);
+    border-radius: 12px;
+    border: 1px dashed var(--primary-dim);
+  }
+</style>
+</head>
+<body>
+
+  <header class="admin-header">
+    <div class="admin-title">BHUKKAD PARTNER</div>
+    <div style="display:flex; gap:1rem; align-items:center;">
+      <button class="nav-link" style="background:transparent; cursor:pointer;" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+    
+    <div class="welcome-section">
+      <div>
+        <h1 class="welcome-title">Welcome back, <span id="partnerName">Rider</span>!</h1>
+        <p class="welcome-subtitle">Vehicle: <span id="partnerVehicle">...</span></p>
+      </div>
+      <div class="status-toggle">
+        <label class="switch">
+          <input type="checkbox" id="statusSwitch" onchange="toggleStatus()">
+          <span class="slider"></span>
+        </label>
+        <span class="status-dot" id="dotStatus"></span>
+        <span id="textStatus" style="font-weight:bold; font-size:0.9rem; color:#fff;">OFFLINE</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">₹ 450</div>
+        <div class="stat-label">Earnings Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Deliveries Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">4.8 ★</div>
+        <div class="stat-label">Customer Rating</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">New Delivery Requests</h2>
+    
+    <div id="ordersContainer">
+      <!-- Dummy Request 1 -->
+      <div class="order-card" style="display:none;" id="dummyOrderCard">
+        <div class="order-details">
+          <div class="order-id">ORDER #BKD-8821</div>
+          <div class="order-route">
+            <strong>Pickup:</strong> Sharma Ji Chaat (Palasia)<br>
+            <strong>Drop:</strong> 101, Silver Springs Appts (Vijay Nagar)
+          </div>
+          <div class="order-distance">📍 4.5 km distance • Est. ₹45 Earning</div>
+        </div>
+        <div>
+          <button class="btn btn-accept" onclick="acceptOrder(this)">ACCEPT ORDER</button>
+        </div>
+      </div>
+
+      <div class="empty-state" id="emptyState">
+        You are currently offline. Go online to receive delivery requests.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Auth Check ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const authData = sessionStorage.getItem('bhukkad_delivery_auth');
+      if (!authData) {
+        alert('You must login first!');
+        window.location.href = 'partner.html';
+        return;
+      }
+      
+      const boy = JSON.parse(authData);
+      document.getElementById('partnerName').innerText = boy.name;
+      document.getElementById('partnerVehicle').innerText = boy.vehicle;
+    });
+
+    function logout() {
+      sessionStorage.removeItem('bhukkad_delivery_auth');
+      window.location.href = 'landingpage.html';
+    }
+
+    // --- Status Toggle Logic ---
+    function toggleStatus() {
+      const isOnline = document.getElementById('statusSwitch').checked;
+      const dot = document.getElementById('dotStatus');
+      const text = document.getElementById('textStatus');
+      const emptyState = document.getElementById('emptyState');
+      const dummyOrder = document.getElementById('dummyOrderCard');
+
+      if (isOnline) {
+        dot.classList.add('online');
+        text.innerText = 'ONLINE';
+        text.style.color = 'var(--success)';
+        
+        emptyState.style.display = 'none';
+        dummyOrder.style.display = 'flex'; // Show dummy order for demo
+      } else {
+        dot.classList.remove('online');
+        text.innerText = 'OFFLINE';
+        text.style.color = '#fff';
+        
+        emptyState.style.display = 'block';
+        emptyState.innerText = 'You are currently offline. Go online to receive delivery requests.';
+        dummyOrder.style.display = 'none';
+      }
+    }
+
+    function acceptOrder(btn) {
+       btn.innerText = 'ACCEPTED ✓';
+       btn.style.background = '#333';
+       btn.style.color = '#fff';
+       btn.disabled = true;
+       alert('Order Accepted! Proceed to pickup location.');
+    }
+  </script>
+</body>
+</html>

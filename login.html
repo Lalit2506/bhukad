@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Bhukkad</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0f0a00;font-family:'DM Sans',sans-serif;}
+
+/* ─── CURTAIN ─── */
+#curtainTop, #curtainBot {
+  position:fixed;left:0;right:0;z-index:190;
+  background:#ff6a00;
+  height:50%; /* Start closed */
+  transition:height 0.55s cubic-bezier(.77,0,.18,1);
+}
+#curtainTop{top:0;}
+#curtainBot{bottom:0;}
+
+/* ─── BACKGROUND ─── */
+.bg-dots {
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,#ffffff08 1px,transparent 1px);
+  background-size:28px 28px;z-index:1;
+}
+.blob {
+  position:absolute;border-radius:50%;
+  filter:blur(100px);pointer-events:none;opacity:0.2;z-index:2;
+}
+.blob.orange { width:50vw;height:50vw;background:#ff6a00;top:-10%;left:-10%; }
+.blob.green  { width:40vw;height:40vw;background:#2aff6e;bottom:-10%;right:-10%; }
+
+/* ─── BACK BUTTON ─── */
+.back-btn {
+  position:absolute;top:1.5rem;left:1.5rem;z-index:10;
+  display:flex;align-items:center;gap:0.5rem;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;
+  color:#ff6a0088;border:1px solid #ff6a0044;
+  padding:0.4rem 1rem;border-radius:30px;
+  background:transparent;cursor:pointer;
+  transition:all 0.3s;
+}
+.back-btn:hover {
+  color:#0f0a00;background:#ff6a00;border-color:#ff6a00;transform:translateX(-3px);
+}
+
+/* ─── CONTAINER ANIMATION ─── */
+.container {
+  position:relative;z-index:5;
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(40px) scale(0.95);
+  transition:all 0.6s cubic-bezier(.22,1,.36,1) 0.3s; /* waits for curtain */
+}
+.container.show {
+  opacity:1;transform:translateY(0) scale(1);
+}
+
+/* ─── GLASS BOX ─── */
+.login-box {
+  width:90%;max-width:400px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,106,0,0.15);
+  border-radius:16px;padding:2.5rem 2rem;
+  box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  text-align:center;
+}
+
+.logo-text {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:3.5rem;letter-spacing:4px;
+  color:#ff6a00;line-height:1;margin-bottom:0.2rem;
+  text-shadow:0 0 20px rgba(255,106,0,0.3);
+}
+.subtitle {
+  font-size:0.85rem;color:#ff6a00aa;margin-bottom:2rem;letter-spacing:0.5px;
+}
+
+/* ─── TOGGLE: LOGIN / SIGN UP ─── */
+.toggle-wrapper {
+  transform-origin:top;transition:all 0.4s cubic-bezier(.77,0,.18,1);
+  display:flex;position:relative;
+  background:rgba(255,106,0,0.05);
+  border-radius:30px;margin-bottom:2rem;
+  border:1px solid rgba(255,106,0,0.1);
+  padding:4px;
+}
+/* Hide toggle gracefully when OTP pane is active */
+#otpState:checked ~ .container .toggle-wrapper {
+  opacity:0;height:0;margin-bottom:0;pointer-events:none;transform:scaleY(0);border-color:transparent;
+}
+.toggle-btn {
+  flex:1;padding:0.6rem;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;
+  color:#ff6a00aa;cursor:pointer;position:relative;z-index:2;
+  transition:color 0.3s;text-transform:uppercase;
+}
+.toggle-btn.active { color:#0f0a00; }
+.toggle-pill {
+  position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);
+  background:#ff6a00;border-radius:26px;z-index:1;
+  transition:transform 0.4s cubic-bezier(.77,0,.18,1);
+}
+/* Pill states */
+#loginState:checked ~ .container .toggle-pill { transform:translateX(0); }
+#signupState:checked ~ .container .toggle-pill { transform:translateX(100%); }
+
+/* Radio buttons hidden */
+input[type="radio"]{display:none;}
+
+/* ─── FORM SLIDER ─── */
+.form-slider {
+  display:flex;width:300%;transition:transform 0.4s cubic-bezier(.77,0,.18,1);
+}
+#signupState:checked ~ .container .form-slider { transform:translateX(-33.333%); }
+#otpState:checked ~ .container .form-slider    { transform:translateX(-66.666%); }
+
+.form-pane {
+  width:33.333%;padding:0 5px;flex-shrink:0;
+}
+
+/* ─── INPUTS (FLOATING LABEL) ─── */
+.input-group {
+  position:relative;margin-bottom:1.5rem;text-align:left;
+}
+.input-group input {
+  width:100%;background:rgba(0,0,0,0.3);
+  border:none;border-bottom:2px solid rgba(255,106,0,0.2);
+  padding:1rem 0.5rem 0.5rem;font-family:'DM Sans',sans-serif;
+  font-size:1rem;color:#fff;outline:none;
+  transition:border-color 0.3s, background 0.3s;
+  border-radius:4px 4px 0 0;
+}
+.input-group input:focus {
+  border-bottom-color:#ff6a00;background:rgba(255,106,0,0.05);
+}
+.input-group label {
+  position:absolute;left:0.5rem;top:0.85rem;
+  color:#ff6a0088;font-size:1rem;pointer-events:none;
+  transition:all 0.3s;transform-origin:left;
+}
+.input-group input:focus ~ label,
+.input-group input:not(:placeholder-shown) ~ label {
+  transform:translateY(-0.7rem) scale(0.75);
+  color:#ff6a00;
+}
+
+/* ─── BUTTON ─── */
+.submit-btn {
+  width:100%;background:#ff6a00;color:#0f0a00;
+  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;
+  padding:0.9rem;border:none;border-radius:6px;cursor:pointer;
+  margin-top:1rem;position:relative;overflow:hidden;
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.submit-btn::after {
+  content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);
+  transform:skewX(-20deg);transition:left 0.5s;
+}
+.submit-btn:hover {
+  transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,106,0,0.4);
+}
+.submit-btn:hover::after {
+  left:150%;
+}
+
+.alt-login {
+  margin-top:1.5rem;font-size:0.75rem;color:#ff6a0077;
+  letter-spacing:1px;text-transform:uppercase;
+  display:flex;align-items:center;gap:0.5rem;
+}
+.alt-login::before, .alt-login::after {
+  content:'';flex:1;height:1px;background:rgba(255,106,0,0.2);
+}
+
+.social-btns {
+  display:flex;gap:1rem;margin-top:1rem;justify-content:center;
+}
+.social-btn {
+  width:40px;height:40px;border-radius:50%;
+  border:1px solid rgba(255,106,0,0.3);background:transparent;
+  color:#ff6a00aa;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all 0.2s;font-size:1.1rem;
+}
+.social-btn:hover {
+  background:rgba(255,106,0,0.1);color:#ff6a00;transform:scale(1.1);
+}
+</style>
+</head>
+<body>
+
+<!-- Hidden states for pure CSS tabs -->
+<input type="radio" name="loginTab" id="loginState" checked>
+<input type="radio" name="loginTab" id="signupState">
+<input type="radio" name="loginTab" id="otpState">
+
+<!-- CURTAINS (starts closed) -->
+<div id="curtainTop"></div>
+<div id="curtainBot"></div>
+
+<!-- BACKGROUND -->
+<div class="bg-dots"></div>
+<div class="blob orange"></div>
+<div class="blob green"></div>
+
+<button class="back-btn" onclick="goBack()">← WAPAS</button>
+
+<div class="container" id="mainContainer">
+  <div class="login-box">
+    <div class="logo-text">BHUKKAD</div>
+    <div class="subtitle">Welcome to the streets</div>
+
+    <!-- Toggle -->
+    <div class="toggle-wrapper" id="toggleWrapper">
+      <div class="toggle-pill"></div>
+      <label for="loginState" class="toggle-btn" id="lblLogin">Login</label>
+      <label for="signupState" class="toggle-btn" id="lblSignup">Sign Up</label>
+    </div>
+
+    <!-- Forms slider -->
+    <div style="overflow:hidden;">
+      <div class="form-slider">
+        
+        <!-- LOGIN PANE -->
+        <div class="form-pane">
+          <div class="input-group">
+            <input type="text" id="phone" placeholder=" ">
+            <label for="phone">Phone or Email</label>
+          </div>
+          <button class="submit-btn" onclick="requestOTP('login')">CONTINUE</button>
+        </div>
+
+        <!-- SIGNUP PANE -->
+        <div class="form-pane">
+          <div class="input-group">
+            <input type="text" id="name" placeholder=" ">
+            <label for="name">Full Name</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="newphone" placeholder=" ">
+            <label for="newphone">Phone or Email</label>
+          </div>
+          <button class="submit-btn" style="background:#2aff6e;color:#001208;" onclick="requestOTP('signup')">REGISTER</button>
+        </div>
+
+        <!-- OTP PANE -->
+        <div class="form-pane" id="paneOtp">
+          <div style="font-size:0.9rem; color:#ff6a00; margin-bottom:1.5rem; letter-spacing:1px; text-transform:uppercase;">Input Secret Code</div>
+          <div class="input-group">
+            <input type="text" id="otpCode" placeholder=" " maxlength="4" style="text-align:center;letter-spacing:20px;font-size:2rem;font-weight:bold;color:#ff6a00;">
+            <label for="otpCode" style="text-align:center; width:100%; left:0;">4-Digit Code</label>
+          </div>
+          <button class="submit-btn" style="background:#fff;color:#ff6a00;" onclick="verifyOTP()">VERIFY & LOGIN</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="font-size:0.75rem; color:#ff6a00aa; margin-top:1.5rem; line-height:1.5;" id="otpNotice">
+      By continuing, you verify that you are the owner of this account.
+    </div>
+
+    <div class="alt-login" id="altLogin">Or continue with</div>
+    <div class="social-btns" id="socialBtns">
+      <button class="social-btn" onclick="googleLogin()">G</button>
+      <button class="social-btn" onclick="facebookLogin()">f</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function googleLogin() {
+    // Simulate Google login
+    const fakeUser = {
+      name: 'Google User',
+      email: 'user@gmail.com'
+    };
+    localStorage.setItem('bhukkad_user', fakeUser.name);
+    localStorage.setItem('bhukkad_email', fakeUser.email);
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTarget = urlParams.get('redirect') || 'landingpage.html';
+    window.location.href = redirectTarget + '?login_success=1&provider=google';
+  }
+
+  function facebookLogin() {
+    // Simulate Facebook login
+    const fakeUser = {
+      name: 'Facebook User',
+      email: 'user@facebook.com'
+    };
+    localStorage.setItem('bhukkad_user', fakeUser.name);
+    localStorage.setItem('bhukkad_email', fakeUser.email);
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTarget = urlParams.get('redirect') || 'landingpage.html';
+    window.location.href = redirectTarget + '?login_success=1&provider=facebook';
+  }
+</script>
+
+<script>
+  const cTop = document.getElementById('curtainTop');
+  const cBot = document.getElementById('curtainBot');
+  const container = document.getElementById('mainContainer');
+
+  const lblLogin = document.getElementById('lblLogin');
+  const lblSignup = document.getElementById('lblSignup');
+  const rdoLogin = document.getElementById('loginState');
+  const rdoSignup = document.getElementById('signupState');
+  const rdoOtp = document.getElementById('otpState');
+  
+  // Hide footer elements on OTP page
+  rdoOtp.addEventListener('change', () => {
+    if(rdoOtp.checked) {
+       document.getElementById('otpNotice').style.display='none';
+       document.getElementById('altLogin').style.display='none';
+       document.getElementById('socialBtns').style.display='none';
+    }
+  });
+
+  // Update toggle button text colors
+  rdoLogin.addEventListener('change', updateTabs);
+  rdoSignup.addEventListener('change', updateTabs);
+  
+  function updateTabs() {
+    if(rdoLogin.checked) {
+      lblLogin.classList.add('active');
+      lblSignup.classList.remove('active');
+    } else {
+      lblSignup.classList.add('active');
+      lblLogin.classList.remove('active');
+    }
+  }
+  updateTabs(); // init
+
+  // Entrance animation
+  window.onload = () => {
+    requestAnimationFrame(()=>{
+      cTop.style.height = '0';
+      cBot.style.height = '0';
+      container.classList.add('show');
+    });
+  };
+
+  function goBack(targetUrl = 'landingpage.html') {
+    cTop.style.transition = 'height 0.4s cubic-bezier(.77,0,.18,1)';
+    cBot.style.transition = 'height 0.4s cubic-bezier(.77,0,.18,1)';
+    cTop.style.height = '50%';
+    cBot.style.height = '50%';
+    container.classList.remove('show');
+
+    setTimeout(() => {
+      window.location.href = targetUrl;
+    }, 450);
+  }
+  
+  let pendingUserName = 'Bhukkad User';
+  
+  function requestOTP(mode) {
+    if (mode === 'signup') {
+      const n = document.getElementById('name').value.trim();
+      if(n) pendingUserName = n;
+    }
+    // Slide to OTP pane
+    rdoOtp.checked = true;
+    rdoOtp.dispatchEvent(new Event('change')); // trigger display:none hiding
+  }
+  
+  function verifyOTP() {
+    const code = document.getElementById('otpCode').value.trim();
+    if(code.length > 0) {
+      // Save logic (with fallback for strict browsers)
+      try { localStorage.setItem('bhukkad_user', pendingUserName); } catch(e){}
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = urlParams.get('redirect');
+      
+      if (redirectTarget) {
+         goBack(redirectTarget + '?login_success=1');
+      } else {
+         goBack('landingpage.html?login_success=1');
+      }
+    } else {
+      alert("Please enter fake OTP to proceed!");
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner Portal - Bhukkad</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- EmailJS Script -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript">
+   (function(){
+      // IMPORTANT: Initialize with your EmailJS Public Key here
+      // emailjs.init("YOUR_PUBLIC_KEY");
+   })();
+</script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#0f0a00;font-family:'DM Sans',sans-serif; overflow-x:hidden;}
+
+/* Navbar */
+.navbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 2rem; border-bottom: 1px solid rgba(255,106,0,0.2);
+  background: rgba(15,10,0,0.9); position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: #ff6a00; text-decoration: none; letter-spacing: 2px;}
+
+/* Container */
+.container {
+  max-width: 800px; margin: 2rem auto; padding: 0 1rem;
+}
+
+.portal-title {
+  text-align: center; color: #fff; font-size: 2rem; font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px; margin-bottom: 0.5rem;
+}
+.portal-subtitle {
+  text-align: center; color: rgba(255,255,255,0.6); font-size: 1rem; margin-bottom: 2rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex; background: rgba(255,106,0,0.05); border: 1px solid rgba(255,106,0,0.2);
+  border-radius: 30px; padding: 4px; margin-bottom: 1rem;
+}
+.tab {
+  flex: 1; text-align: center; padding: 0.8rem; cursor: pointer; color: rgba(255,255,255,0.6);
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+  border-radius: 26px;
+}
+.tab.active { background: #ff6a00; color: #000; }
+
+.sub-tabs {
+  display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;
+}
+.sub-tab {
+  background: transparent; border: none; color: rgba(255,255,255,0.5); font-weight: bold;
+  cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent; transition: 0.3s;
+  font-size: 1.1rem;
+}
+.sub-tab.active { color: #ff6a00; border-bottom-color: #ff6a00; }
+
+/* Form Card */
+.form-card {
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,106,0,0.15);
+  padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  display: none; animation: fadeIn 0.3s ease;
+}
+.form-card.active { display: block; }
+
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+/* Input Styles */
+.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media(max-width: 600px) { .input-row { grid-template-columns: 1fr; gap: 1rem; } }
+
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.2rem; }
+.form-group label {
+  font-size: 0.85rem; color: #ff6a00aa; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
+}
+.form-control {
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,106,0,0.2); border-radius: 8px;
+  padding: 1rem; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 1rem; transition: 0.3s;
+}
+.form-control:focus { border-color: #ff6a00; outline: none; background: rgba(255,106,0,0.05); }
+.form-control[type="file"] { padding: 0.7rem; font-size: 0.9rem; color: rgba(255,255,255,0.6); }
+
+/* Buttons */
+.btn {
+  width: 100%; padding: 1.2rem; background: #ff6a00; color: #000; border: none; border-radius: 8px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 2px; cursor: pointer;
+  transition: transform 0.2s, background 0.2s; margin-top: 1rem;
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.btn:disabled { background: #555; color: #aaa; cursor: not-allowed; transform: none; }
+
+/* OTP Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.otp-box {
+  background: #110800; border: 1px solid #ff6a00; padding: 3rem 2rem; border-radius: 16px;
+  width: 90%; max-width: 400px; text-align: center;
+}
+.otp-title { color: #ff6a00; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; margin-bottom: 1rem; letter-spacing: 1px;}
+.otp-desc { color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 2rem; }
+.otp-input {
+  width: 100%; background: #000; border: 1px solid rgba(255,106,0,0.4); border-radius: 8px;
+  padding: 1rem; color: #fff; font-size: 2rem; text-align: center; letter-spacing: 15px;
+  margin-bottom: 1.5rem; font-family: monospace; outline: none;
+}
+.otp-input:focus { border-color: #ff6a00; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="landingpage.html" class="logo">BHUKKAD</a>
+  <a href="landingpage.html" style="color:#fff; text-decoration:none; font-size:0.9rem; border:1px solid #ff6a00aa; padding: 0.3rem 1rem; border-radius:20px;">Exit Portal</a>
+</nav>
+
+<div class="container">
+  <h1 class="portal-title">BHUKKAD PARTNER PORTAL</h1>
+  <p class="portal-subtitle">Join the revolution. Deliver flavor or cook it up.</p>
+
+  <!-- Main Tabs: Hawker vs Delivery -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchRole('hawker')" id="tabHawker">Hawker / Kitchen</div>
+    <div class="tab" onclick="switchRole('delivery')" id="tabDelivery">Delivery Partner</div>
+  </div>
+
+  <!-- Sub Tabs: Login vs Register -->
+  <div class="sub-tabs">
+    <button class="sub-tab" onclick="switchMode('login')" id="sTabLogin">Login</button>
+    <button class="sub-tab active" onclick="switchMode('register')" id="sTabRegister">Register</button>
+  </div>
+
+  <!-- 1. Hawker Registration -->
+  <div class="form-card active" id="formHawkerRegister">
+    <h2 style="color:#fff; margin-bottom:1.5rem; font-family:'Bebas Neue',sans-serif; letter-spacing:1px;">Register as Hawker/Kitchen</h2>
+    <div class="input-row">
+      <div class="form-group"><label>Shop / Kitchen Name</label><input type="text" id="hShop" class="form-control" placeholder="e.g. Sharma Ji Chaat"></div>
+      <div class="form-group"><label>Owner Name</label><input type="text" id="hOwner" class="form-control" placeholder="e.g. Rahul Sharma"></div>
+    </div>
+    <div class="input-row">
+      <div class="form-group"><label>Mobile Number</label><input type="tel" id="hMobile" class="form-control" placeholder="10-digit number"></div>
+      <div class="form-group"><label>Email Address</label><input type="email" id="hEmail" class="form-control" placeholder="Required for OTP"></div>
+    </div>
+    
+    <div class="form-group">
+      <label>Platform Setup</label>
+      <select id="hPlatform" class="form-control">
+        <option value="nukkad">Nukkad Ka Zayaka (Street Food)</option>
+        <option value="ghar">Ghar Ka Khana (Home Kitchen / Tiffin)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Food Type</label>
+      <select id="hType" class="form-control">
+        <option value="veg">Pure Veg 🟢</option>
+        <option value="nonveg">Non-Veg 🔴</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Slogans / Description</label><input type="text" id="hDesc" class="form-control" placeholder="Brief description of your food..."></div>
+
+    <div class="input-row">
+      <div class="form-group"><label>Store Image</label><input type="file" id="hStoreImg" class="form-control" accept="image/*"></div>
+      <div class="form-group"><label>Menu PDF/Image</label><input type="file" id="hMenuImg" class="form-control" accept="image/*,application/pdf"></div>
+    </div>
+    <button class="btn" onclick="initiateOTP('hawker', 'register')">SEND OTP & REGISTER</button>
+  </div>
+
+  <!-- 2. Delivery Boy Registration -->
+  <div class="form-card" id="formDeliveryRegister">
+    <h2 style="color:#fff; margin-bottom:1.5rem; font-family:'Bebas Neue',sans-serif; letter-spacing:1px;">Register as Delivery Partner</h2>
+    <div class="input-row">
+      <div class="form-group"><label>Full Name</label><input type="text" id="dName" class="form-control" placeholder="As per documents"></div>
+      <div class="form-group"><label>Mobile Number</label><input type="tel" id="dMobile" class="form-control" placeholder="10-digit number"></div>
+    </div>
+    <div class="form-group"><label>Email Address</label><input type="email" id="dEmail" class="form-control" placeholder="Required for OTP"></div>
+    <div class="form-group"><label>Vehicle Details (Make & Number)</label><input type="text" id="dVehicle" class="form-control" placeholder="e.g. Honda Activa MP09 AB 1234"></div>
+    
+    <div class="input-row">
+      <div class="form-group"><label>Aadhar Card Photo</label><input type="file" id="dAadharImg" class="form-control" accept="image/*"></div>
+      <div class="form-group"><label>Driving Licence Photo</label><input type="file" id="dLicenseImg" class="form-control" accept="image/*"></div>
+    </div>
+    <div class="form-group"><label>Your clear passport photo</label><input type="file" id="dSelfieImg" class="form-control" accept="image/*"></div>
+
+    <button class="btn" onclick="initiateOTP('delivery', 'register')">SEND OTP & REGISTER</button>
+  </div>
+
+  <!-- 3. General Login -->
+  <div class="form-card" id="formLogin">
+    <h2 style="color:#fff; margin-bottom:1.5rem; font-family:'Bebas Neue',sans-serif; letter-spacing:1px; text-align:center;">PARTNER LOGIN</h2>
+    <div class="form-group">
+      <label>Registered Email</label>
+      <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email to receive OTP">
+    </div>
+    <button class="btn" onclick="initiateOTP('general', 'login')">SEND OTP TO LOGIN</button>
+  </div>
+
+</div>
+
+<!-- OTP Modal -->
+<div class="modal-overlay" id="otpModal">
+  <div class="otp-box">
+    <h2 class="otp-title">VERIFY OTP</h2>
+    <p class="otp-desc" id="otpMessage">We've sent a 4-digit code to your email.</p>
+    <input type="text" id="otpInput" class="otp-input" maxlength="4" placeholder="----">
+    <button class="btn" onclick="verifyOTP()">VERIFY EMAIL</button>
+    <button style="background:transparent; border:none; color:rgba(255,255,255,0.4); margin-top:1rem; cursor:pointer; font-family:'DM Sans',sans-serif;" onclick="closeOTP()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  let currentRole = 'hawker'; // hawker or delivery
+  let currentMode = 'register'; // register or login
+  
+  let pendingData = null; // Stores data before OTP verification
+  let generatedOTP = null;
+
+  // Read URL params for intial routing
+  window.onload = () => {
+    const params = new URLSearchParams(window.location.search);
+    if(params.get('role') === 'delivery') {
+      switchRole('delivery');
+    }
+  };
+
+  function switchRole(role) {
+    currentRole = role;
+    document.getElementById('tabHawker').className = role === 'hawker' ? 'tab active' : 'tab';
+    document.getElementById('tabDelivery').className = role === 'delivery' ? 'tab active' : 'tab';
+    updateView();
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById('sTabLogin').className = mode === 'login' ? 'sub-tab active' : 'sub-tab';
+    document.getElementById('sTabRegister').className = mode === 'register' ? 'sub-tab active' : 'sub-tab';
+    updateView();
+  }
+
+  function updateView() {
+    document.getElementById('formHawkerRegister').classList.remove('active');
+    document.getElementById('formDeliveryRegister').classList.remove('active');
+    document.getElementById('formLogin').classList.remove('active');
+
+    if (currentMode === 'login') {
+      document.getElementById('formLogin').classList.add('active');
+    } else {
+      if (currentRole === 'hawker') document.getElementById('formHawkerRegister').classList.add('active');
+      else document.getElementById('formDeliveryRegister').classList.add('active');
+    }
+  }
+
+  // File to Base64 (Mocking file upload for local DB)
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      if(!file) return resolve(null);
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  }
+
+  // --- OTP & API Logic ---
+  async function initiateOTP(role, mode) {
+    let email = '';
+    
+    if (mode === 'login') {
+       email = document.getElementById('loginEmail').value.trim();
+       if(!email) return alert("Please enter email");
+       pendingData = { action: 'login', email };
+    } 
+    else if (mode === 'register' && role === 'hawker') {
+       email = document.getElementById('hEmail').value.trim();
+       const shop = document.getElementById('hShop').value.trim();
+       if(!email || !shop) return alert("Shop Name and Email are mandatory");
+       
+       const imgFile = document.getElementById('hStoreImg').files[0];
+       const base64Img = await getBase64(imgFile);
+
+       pendingData = {
+         action: 'register_hawker', email,
+         payload: {
+           id: Date.now(),
+           email: email,
+           name: shop,
+           owner: document.getElementById('hOwner').value,
+           mobile: document.getElementById('hMobile').value,
+           platform: document.getElementById('hPlatform').value,
+           type: document.getElementById('hType').value,
+           desc: document.getElementById('hDesc').value || "A new taste in town",
+           rating: 0.0,
+           isAdminApproved: false, // Must be approved by Admin!
+           image: base64Img || 'https://via.placeholder.com/400x300/100500/ff6a00?text=Pending+Approval'
+         }
+       };
+    }
+    else if (mode === 'register' && role === 'delivery') {
+       email = document.getElementById('dEmail').value.trim();
+       const name = document.getElementById('dName').value.trim();
+       if(!email || !name) return alert("Name and Email are mandatory");
+
+       // Mocking the document uploads
+       pendingData = {
+         action: 'register_delivery', email,
+         payload: {
+           id: Date.now(),
+           email: email,
+           name: name,
+           mobile: document.getElementById('dMobile').value,
+           vehicle: document.getElementById('dVehicle').value,
+           isAdminApproved: false,
+           dateAdded: new Date().toLocaleDateString()
+         }
+       };
+    }
+
+    // Generate random 4-digit OTP
+    generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // --- EMAILJS INTEGRATION ---
+    // User requested to send via their email.
+    // We attempt to send Using EmailJS if configured.
+    if (typeof emailjs !== 'undefined' && false) { // Set to true when keys are configured
+      emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+          to_email: email,
+          otp: generatedOTP,
+          reply_to: "bhukadgang.food@gmail.com"
+      }).then(
+        function(response) { console.log("SUCCESS", response); },
+        function(error) { console.log("FAILED", error); }
+      );
+    } else {
+      console.warn("EmailJS keys missing. Simulating OTP send.", generatedOTP);
+      // alert("DEVELOPER MOCK: OTP is " + generatedOTP + " (Configure EmailJS to send real emails)");
+      // Injecting the code into the subtitle for demo purposes so user can pass
+      document.getElementById('otpMessage').innerHTML = `We've sent a code to <b>${email}</b>. <br><span style="color:#ff6a00; font-size:0.8rem;">(Demo Mode MOCK OTP: ${generatedOTP})</span>`;
+    }
+
+    document.getElementById('otpModal').classList.add('active');
+  }
+
+  function closeOTP() {
+    document.getElementById('otpModal').classList.remove('active');
+    document.getElementById('otpInput').value = '';
+    generatedOTP = null;
+    pendingData = null;
+  }
+
+  function verifyOTP() {
+    const input = document.getElementById('otpInput').value.trim();
+    if (input === generatedOTP) {
+       // Proceed
+       if(pendingData.action === 'login') {
+          const emailCheck = pendingData.email;
+          let foundBoy = JSON.parse(localStorage.getItem('bhukkad_delivery_boys') || '[]').find(b => b.email === emailCheck);
+          let foundHawker = JSON.parse(localStorage.getItem('bhukkad_stalls') || '[]').find(s => s.email === emailCheck);
+          if(!foundHawker) foundHawker = JSON.parse(localStorage.getItem('bhukkad_home_stalls') || '[]').find(s => s.email === emailCheck);
+
+          if(foundBoy) {
+             if(foundBoy.isAdminApproved) {
+                sessionStorage.setItem('bhukkad_delivery_auth', JSON.stringify(foundBoy));
+                alert('Login Successful! Welcome to delivery dashboard.');
+                window.location.href = 'delivery_dashboard.html';
+             } else {
+                alert('Wait for Admin approval to view your dashboard.');
+             }
+          } else if(foundHawker) {
+             if(foundHawker.isAdminApproved) {
+                alert('Login Successful! Welcome to partner dashboard.');
+                // Here you would redirect to a hawker dashboard, but falling back to landing page for now
+                window.location.href = 'landingpage.html';
+             } else {
+                alert('Wait for Admin approval to view your dashboard.');
+             }
+          } else {
+             alert('Email not registered! Please register first.');
+          }
+       } 
+       else if (pendingData.action === 'register_hawker') {
+          // Save to LocalStorage
+          const p = pendingData.payload;
+          const targetKey = p.platform === 'ghar' ? 'bhukkad_home_stalls' : 'bhukkad_stalls';
+          let items = JSON.parse(localStorage.getItem(targetKey) || '[]');
+          items.unshift(p);
+          localStorage.setItem(targetKey, JSON.stringify(items));
+          
+          alert('Registration successful! Submitted to Bhukkad Admin for verification.');
+          window.location.href = 'landingpage.html';
+       }
+       else if (pendingData.action === 'register_delivery') {
+          // Save Delivery Boy
+          let boys = JSON.parse(localStorage.getItem('bhukkad_delivery_boys') || '[]');
+          boys.unshift(pendingData.payload);
+          localStorage.setItem('bhukkad_delivery_boys', JSON.stringify(boys));
+          
+          alert('Delivery Partner Registration successful! Submitted to Admin for verification.');
+          window.location.href = 'landingpage.html';
+       }
+    } else {
+       alert("Invalid OTP! Try again.");
+    }
+  }
+
+</script>
+</body>
+</html>

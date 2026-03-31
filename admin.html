@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Bhukkad</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #0f0a00;
+    --primary: #ff6a00;
+    --primary-dim: rgba(255, 106, 0, 0.2);
+    --text-main: #ffffff;
+    --text-muted: #ff6a00aa;
+    --bg-card: #1a0b00;
+    --success: #2aff6e;
+    --danger: #ff3b3b;
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: var(--bg-dark);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  .admin-header {
+    background: #1a0b00;
+    border-bottom: 2px solid var(--primary);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .admin-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--primary);
+    letter-spacing: 2px;
+  }
+
+  .nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { border-color: var(--primary); color: var(--primary); }
+
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+  }
+
+  @media(max-width: 768px) {
+    .dashboard-container { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--primary-dim);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+  }
+
+  /* Form Styles */
+  .form-group {
+    margin-bottom: 1.2rem;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    letter-spacing: 1px;
+  }
+  .form-control {
+    width: 100%;
+    background: rgba(255, 106, 0, 0.05);
+    border: 1px solid rgba(255, 106, 0, 0.2);
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .form-control:focus {
+    background: rgba(255, 106, 0, 0.1);
+    border-color: var(--primary);
+    outline: none;
+  }
+  textarea.form-control { resize: vertical; min-height: 80px; }
+  
+  select.form-control option { background: var(--bg-dark); color: #fff; }
+
+  /* Image Preview */
+  .img-preview {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed rgba(255,106,0,0.3);
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.8rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--primary); color: #000; }
+  .btn-primary:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+  /* Table Styles */
+  .table-responsive { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+  th {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  
+  .status-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .status-pub { background: rgba(42, 255, 110, 0.15); color: var(--success); border: 1px solid rgba(42, 255, 110, 0.3); }
+  .status-unpub { background: rgba(255, 59, 59, 0.15); color: var(--danger); border: 1px solid rgba(255, 59, 59, 0.3); }
+
+  .action-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+  }
+  .action-btn:hover { border-color: #fff; }
+  .btn-toggle-pub { color: var(--success); border-color: var(--success); }
+  .btn-toggle-pub:hover { background: rgba(42, 255, 110, 0.1); }
+  .btn-delete { color: var(--danger); border-color: var(--danger); }
+  .btn-delete:hover { background: rgba(255, 59, 59, 0.1); }
+
+  .hawker-thumb {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--primary-dim);
+  }
+
+  /* Admin Login Styles */
+  .admin-login-overlay {
+    position: fixed; inset: 0; background: var(--bg-dark); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-card {
+    background: var(--bg-card); border: 1px solid var(--primary-dim);
+    padding: 3rem 2rem; border-radius: 12px; width: 100%; max-width: 400px;
+    text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .login-card h2 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--primary);
+    letter-spacing: 2px; margin-bottom: 2rem; text-align: center;
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- Admin Login Overlay -->
+  <div id="adminLoginOverlay" class="admin-login-overlay">
+    <div class="login-card">
+       <h2>ADMIN LOGIN</h2>
+       <div class="form-group">
+         <label>User ID</label>
+         <input type="text" id="adminId" class="form-control" placeholder="Enter admin ID">
+       </div>
+       <div class="form-group">
+         <label>Password</label>
+         <input type="password" id="adminPass" class="form-control" placeholder="Enter password">
+       </div>
+       <button class="btn btn-primary" onclick="verifyAdmin()" style="margin-top: 1rem;">LOGIN</button>
+       <p id="adminError" style="color:var(--danger); font-size:0.85rem; display:none; margin-top:1rem; text-align:center;">Invalid User ID or Password</p>
+    </div>
+  </div>
+
+  <div id="adminContent" style="display:none;">
+    <header class="admin-header">
+      <div class="admin-title">BHUKKAD ADMIN</div>
+      <div style="display:flex; gap:1rem; align-items:center;">
+        <a href="nukkad_ka_zayaka.html" class="nav-link">View Site ↗</a>
+        <button class="nav-link" style="background:transparent; cursor:pointer;" onclick="logoutAdmin()">Logout</button>
+      </div>
+    </header>
+
+    <div style="max-width: 1200px; margin: 1rem auto 0; padding: 0 2rem; display: flex; gap: 1rem;">
+      <button class="nav-link" id="tabVendors" onclick="switchAdminTab('vendors')" style="background:var(--primary); color:#000; font-weight:bold; cursor:pointer;">Vendors & Hawkers</button>
+      <button class="nav-link" id="tabDelivery" onclick="switchAdminTab('delivery')" style="background:transparent; color:#fff; font-weight:bold; cursor:pointer;">Delivery Partners</button>
+    </div>
+
+    <div class="dashboard-container" id="vendorView">
+    
+    <!-- Left Panel: Add Hawker Form -->
+    <div class="panel">
+      <h2 class="panel-title">+ Add New Hawker</h2>
+      <form id="hawkerForm">
+        <div class="form-group">
+          <label>Hawker Name</label>
+          <input type="text" id="hName" class="form-control" required placeholder="e.g., Sharma Ji Chaat">
+        </div>
+        <div class="form-group">
+          <label>Rating (1.0 to 5.0)</label>
+          <input type="number" id="hRating" class="form-control" step="0.1" min="1" max="5" required value="4.0">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="hDesc" class="form-control" required placeholder="Short description of the food..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Food Type</label>
+          <select id="hType" class="form-control">
+            <option value="veg">Pure Veg 🟢</option>
+            <option value="nonveg">Non-Veg 🔴</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Platform Setup</label>
+          <select id="hPlatform" class="form-control">
+            <option value="nukkad">Nukkad Ka Zayaka (Street Food)</option>
+            <option value="ghar">Ghar Ka Khana (Home Food)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Upload Image</label>
+          <input type="file" id="hFile" class="form-control" accept="image/*" required>
+          <div class="img-preview" id="imgPreview">Image Preview</div>
+        </div>
+
+        <div class="form-group" style="padding: 1rem; border: 1px dashed var(--primary-dim); border-radius: 6px; background: rgba(0,0,0,0.3);">
+          <label style="color:var(--primary); margin-bottom: 0.8rem;">Written Menu Items</label>
+          <div id="menuItemsContainer">
+            <div class="menu-item-row" style="display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center;">
+               <input type="text" class="form-control m-name" placeholder="Item Name (e.g. Samosa)" required>
+               <input type="number" class="form-control m-price" placeholder="Price (₹)" style="width:100px;" required min="1">
+            </div>
+          </div>
+          <button type="button" class="btn" style="background:transparent; border:1px solid var(--primary); color:var(--primary); font-size:1rem; padding:0.4rem; margin-top:0.5rem;" onclick="addMenuItemRow()">+ Add Another Item</button>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+          <input type="checkbox" id="hPublish" checked style="width: 18px; height: 18px;">
+          <label for="hPublish" style="margin: 0; color: #fff;">Publish Immediately?</label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">SAVE HAWKER</button>
+      </form>
+    </div>
+
+    <!-- Right Panel: Manage List -->
+    <div class="panel">
+      <h2 class="panel-title">Manage Hawkers</h2>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Platform</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="hawkerTableBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    </div>
+
+    <!-- Delivery View -->
+    <div class="dashboard-container" id="deliveryView" style="display:none; grid-template-columns: 1fr;">
+      <div class="panel">
+        <h2 class="panel-title">Manage Delivery Partners</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Registration Date</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Vehicle</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="deliveryTableBody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div> <!-- End adminContent -->
+
+  <script>
+    // --- Auth Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+      if (sessionStorage.getItem('bhukkad_admin_auth') === 'true') {
+        document.getElementById('adminLoginOverlay').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+      }
+    });
+
+    function verifyAdmin() {
+      const id = document.getElementById('adminId').value;
+      const pass = document.getElementById('adminPass').value;
+      
+      // Hardcoded credentials for demonstration
+      if (id === 'bhukkad_bawa' && pass === 'bhukkad@1206') { 
+         sessionStorage.setItem('bhukkad_admin_auth', 'true');
+         document.getElementById('adminLoginOverlay').style.display = 'none';
+         document.getElementById('adminContent').style.display = 'block';
+      } else {
+         document.getElementById('adminError').style.display = 'block';
+      }
+    }
+    
+    function logoutAdmin() {
+      sessionStorage.removeItem('bhukkad_admin_auth');
+      location.reload();
+    }
+    // --- Data Manager ---
+    function getPlatformData(platform) {
+      const key = platform === 'ghar' ? 'bhukkad_home_stalls' : 'bhukkad_stalls';
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : [];
+    }
+
+    function savePlatformData(platform, data) {
+      const key = platform === 'ghar' ? 'bhukkad_home_stalls' : 'bhukkad_stalls';
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch(e) {
+        alert("Warning: LocalStorage quota exceeded. Image may be too large or database is full.");
+      }
+      renderTable();
+    }
+
+    // --- Image Preview Logic (With Compression) ---
+    let base64Image = '';
+    document.getElementById('hFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 500;
+            const MAX_HEIGHT = 500;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            } else {
+              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            base64Image = canvas.toDataURL('image/jpeg', 0.6); // Shrink to 60% JPEG
+            document.getElementById('imgPreview').style.backgroundImage = `url(${base64Image})`;
+            document.getElementById('imgPreview').innerText = '';
+          };
+          img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // --- Dynamic Menu Logic ---
+    function addMenuItemRow() {
+      const container = document.getElementById('menuItemsContainer');
+      const row = document.createElement('div');
+      row.className = 'menu-item-row';
+      row.style = 'display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center;';
+      row.innerHTML = `
+         <input type="text" class="form-control m-name" placeholder="Item Name (e.g. Samosa)" required>
+         <input type="number" class="form-control m-price" placeholder="Price (₹)" style="width:100px;" required min="1">
+         <button type="button" style="background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:1.5rem; padding:0 0.5rem;" onclick="this.parentElement.remove()">×</button>
+      `;
+      container.appendChild(row);
+    }
+
+    // --- Form Submit Logic ---
+    document.getElementById('hawkerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const platform = document.getElementById('hPlatform').value;
+      
+      // Capture custom menu items
+      const menuRows = document.querySelectorAll('.menu-item-row');
+      const customMenu = [];
+      menuRows.forEach((row, i) => {
+         const name = row.querySelector('.m-name').value.trim();
+         const price = parseFloat(row.querySelector('.m-price').value);
+         if(name && price) {
+            customMenu.push({ id: Date.now() + i, name: name, price: price });
+         }
+      });
+
+      const newStall = {
+        id: Date.now(), // simple unique ID
+        name: document.getElementById('hName').value,
+        rating: parseFloat(document.getElementById('hRating').value),
+        desc: document.getElementById('hDesc').value,
+        type: document.getElementById('hType').value,
+        menuItems: customMenu, // Save the dynamic menu!
+        isAdminApproved: document.getElementById('hPublish').checked,
+        image: base64Image || 'https://via.placeholder.com/400x300/100500/ff6a00?text=No+Image'
+      };
+
+      const dataStr = getPlatformData(platform);
+      dataStr.unshift(newStall); // Add to top
+      savePlatformData(platform, dataStr);
+
+      // Reset form
+      this.reset();
+      
+      // Reset Menu Items to 1 blank row
+      document.getElementById('menuItemsContainer').innerHTML = `
+        <div class="menu-item-row" style="display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center;">
+           <input type="text" class="form-control m-name" placeholder="Item Name (e.g. Samosa)" required>
+           <input type="number" class="form-control m-price" placeholder="Price (₹)" style="width:100px;" required min="1">
+        </div>
+      `;
+
+      base64Image = '';
+      document.getElementById('imgPreview').style.backgroundImage = 'none';
+      document.getElementById('imgPreview').innerText = 'Image Preview';
+      alert('Hawker saved successfully to ' + (platform === 'ghar' ? 'Ghar Ka Khana' : 'Nukkad Ka Zayaka') + '!');
+    });
+
+    // --- Table Render Logic ---
+    function renderTable() {
+      const nukkadStalls = getPlatformData('nukkad').map(s => ({...s, _platform: 'nukkad'}));
+      const gharStalls = getPlatformData('ghar').map(s => ({...s, _platform: 'ghar'}));
+      
+      const allStalls = [...nukkadStalls, ...gharStalls].sort((a,b) => b.id - a.id); // Newest first
+
+      const tbody = document.getElementById('hawkerTableBody');
+      tbody.innerHTML = '';
+
+      if (allStalls.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:gray;">No hawkers found. Add one!</td></tr>`;
+        return;
+      }
+
+      allStalls.forEach(stall => {
+        const tr = document.createElement('tr');
+        
+        const statusBadge = stall.isAdminApproved 
+          ? `<span class="status-badge status-pub">Published</span>`
+          : `<span class="status-badge status-unpub">Draft</span>`;
+          
+        const toggleText = stall.isAdminApproved ? 'Unpublish' : 'Publish';
+        const platformLabel = stall._platform === 'ghar' ? '<span style="color:var(--success);">Ghar Ka Khana</span>' : '<span style="color:var(--primary);">Nukkad Ka Zayaka</span>';
+
+        tr.innerHTML = `
+          <td><img src="${stall.image}" class="hawker-thumb" alt="thumb" onerror="this.src='https://via.placeholder.com/60x40/100500/ff6a00?text=Img'"></td>
+          <td style="font-weight: 500;">${stall.name}</td>
+          <td style="font-size: 0.8rem; font-weight:700;">${platformLabel}</td>
+          <td>${stall.type === 'veg' ? '🟢 Veg' : '🔴 Non-Veg'}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button class="action-btn btn-toggle-pub" onclick="togglePublish(${stall.id}, '${stall._platform}')">${toggleText}</button>
+            <button class="action-btn btn-delete" onclick="deleteStall(${stall.id}, '${stall._platform}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- Actions ---
+    window.togglePublish = function(id, platform) {
+      const stalls = getPlatformData(platform);
+      const stall = stalls.find(s => s.id == id);
+      if (stall) {
+        stall.isAdminApproved = !stall.isAdminApproved;
+        savePlatformData(platform, stalls);
+      }
+    };
+
+    window.deleteStall = function(id, platform) {
+      if(confirm('Are you sure you want to delete this listing?')) {
+        let stalls = getPlatformData(platform);
+        stalls = stalls.filter(s => s.id != id);
+        savePlatformData(platform, stalls);
+      }
+    };
+
+    // Initialize list on load
+    renderTable();
+
+    // --- Delivery Boys Management ---
+    function switchAdminTab(tab) {
+      if(tab === 'vendors') {
+         document.getElementById('vendorView').style.display = 'grid';
+         document.getElementById('deliveryView').style.display = 'none';
+         document.getElementById('tabVendors').style.background = 'var(--primary)';
+         document.getElementById('tabVendors').style.color = '#000';
+         document.getElementById('tabDelivery').style.background = 'transparent';
+         document.getElementById('tabDelivery').style.color = '#fff';
+      } else {
+         document.getElementById('vendorView').style.display = 'none';
+         document.getElementById('deliveryView').style.display = 'grid';
+         document.getElementById('tabDelivery').style.background = 'var(--primary)';
+         document.getElementById('tabDelivery').style.color = '#000';
+         document.getElementById('tabVendors').style.background = 'transparent';
+         document.getElementById('tabVendors').style.color = '#fff';
+         renderDeliveryTable();
+      }
+    }
+
+    function getDeliveryBoys() {
+      const data = localStorage.getItem('bhukkad_delivery_boys');
+      return data ? JSON.parse(data) : [];
+    }
+    function saveDeliveryBoys(boys) {
+      localStorage.setItem('bhukkad_delivery_boys', JSON.stringify(boys));
+      renderDeliveryTable();
+    }
+
+    function renderDeliveryTable() {
+      const boys = getDeliveryBoys();
+      const tbody = document.getElementById('deliveryTableBody');
+      tbody.innerHTML = '';
+      if(boys.length === 0) {
+         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:gray;">No delivery partners registered yet.</td></tr>';
+         return;
+      }
+      boys.forEach(b => {
+        const tr = document.createElement('tr');
+        const statusBadge = b.isAdminApproved 
+          ? `<span class="status-badge status-pub">Approved</span>`
+          : `<span class="status-badge status-unpub">Pending</span>`;
+        const toggleText = b.isAdminApproved ? 'Revoke' : 'Approve';
+        tr.innerHTML = `
+          <td>${b.dateAdded || 'N/A'}</td>
+          <td style="font-weight:bold;">${b.name}</td>
+          <td>${b.mobile}</td>
+          <td>${b.vehicle}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <button class="action-btn btn-toggle-pub" onclick="toggleDelivery(${b.id})">${toggleText}</button>
+            <button class="action-btn btn-delete" onclick="deleteDelivery(${b.id})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.toggleDelivery = function(id) {
+       let boys = getDeliveryBoys();
+       let m = boys.find(x => x.id == id);
+       if(m) { 
+         m.isAdminApproved = !m.isAdminApproved; 
+         saveDeliveryBoys(boys); 
+       }
+    };
+    
+    window.deleteDelivery = function(id) {
+       if(confirm('Are you sure you want to delete this delivery partner?')) {
+          let boys = getDeliveryBoys().filter(x => x.id != id);
+          saveDeliveryBoys(boys);
+       }
+    };
+  </script>
+</body>
+</html>
