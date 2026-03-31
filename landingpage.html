@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhukkad</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Tiro+Devanagari+Hindi:ital@1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;margin:0;background:#0f0a00;font-family:'DM Sans',sans-serif;}
+
+/* ─── SPLASH ─── */
+#splash {
+  position:fixed;inset:0;z-index:900;
+  background:#0f0a00;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+/* Zomato-style ripple rings */
+.ring {
+  position:absolute;
+  border-radius:50%;
+  border:1px solid #ff6a00;
+  opacity:0;
+  animation:ringPulse 2s ease-out infinite;
+}
+.ring:nth-child(1){width:120px;height:120px;animation-delay:0s;}
+.ring:nth-child(2){width:220px;height:220px;animation-delay:0.3s;}
+.ring:nth-child(3){width:340px;height:340px;animation-delay:0.6s;}
+.ring:nth-child(4){width:480px;height:480px;animation-delay:0.9s;}
+.ring:nth-child(5){width:640px;height:640px;animation-delay:1.2s;}
+
+@keyframes ringPulse {
+  0%  {transform:scale(0.6);opacity:0.6;}
+  100%{transform:scale(1.1);opacity:0;}
+}
+
+.splash-logo-wrap {
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+
+/* Logo starts huge, zooms to center then flies off */
+.splash-logo {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(5rem,18vw,10rem);
+  letter-spacing:8px;
+  color:#ff6a00;
+  line-height:1;
+  opacity:0;
+  transform:scale(0.2);
+  animation:
+    logoZoomIn  0.6s cubic-bezier(.22,1,.36,1) 0.2s forwards,
+    logoHold    0.4s linear 0.9s forwards,
+    logoZoomOut 0.5s cubic-bezier(.55,0,1,.45) 1.4s forwards;
+  text-shadow:0 0 80px #ff6a0066;
+}
+
+@keyframes logoZoomIn {
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes logoHold {
+  from{opacity:1;transform:scale(1);}
+  to  {opacity:1;transform:scale(1);}
+}
+@keyframes logoZoomOut {
+  to{opacity:0;transform:scale(14);filter:blur(4px);}
+}
+
+/* ─── CURTAIN (Zomato red curtain wipe for routing) ─── */
+#curtainTop, #curtainBot {
+  position:fixed;left:0;right:0;z-index:800;
+  background:#cb202d; /* zomato brand red */
+  transition:height 0.55s cubic-bezier(.77,0,.18,1);
+}
+#curtainTop{top:0;height:0;}
+#curtainBot{bottom:0;height:0;}
+#curtainTop.open{height:50%;}
+#curtainBot.open{height:50%;}
+#curtainTop.close{height:0;}
+#curtainBot.close{height:0;}
+
+/* ─── SPLIT SCREEN & STICKY PARALLAX ─── */
+.hero-scroll-wrapper {
+  height: 250vh;
+  position: relative;
+  width: 100%;
+}
+#split {
+  position:sticky;top:0;height:100vh;z-index:100;
+  display:grid;grid-template-columns:1fr 1fr;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.01s;
+  overflow:hidden;
+  transform-origin:top center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+}
+#split.visible{opacity:1;pointer-events:all;}
+
+/* Halves slide in from outside */
+.half {
+  position:relative;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  overflow:hidden;cursor:pointer;
+  transition:flex 0.5s cubic-bezier(.22,1,.36,1), filter 0.3s;
+}
+
+#street {
+  background:#100500;
+  transform:translateX(-100%);
+  transition:transform 0.6s cubic-bezier(.22,1,.36,1), flex 0.5s cubic-bezier(.22,1,.36,1), filter 0.3s;
+}
+#home {
+  background:#001208;
+  transform:translateX(100%);
+  transition:transform 0.6s cubic-bezier(.22,1,.36,1) 0.08s, flex 0.5s cubic-bezier(.22,1,.36,1), filter 0.3s;
+}
+
+#split.visible #street{transform:translateX(0);}
+#split.visible #home {transform:translateX(0);}
+
+/* Hover expand */
+#split:hover #street:hover,
+#split:hover #home:hover { flex:1.3; }
+#split:has(#street:hover) #home  { filter:brightness(0.45); }
+#split:has(#home:hover)   #street{ filter:brightness(0.45); }
+
+/* Divider line */
+.divider {
+  position:absolute;top:0;left:50%;width:2px;height:100%;
+  z-index:10;pointer-events:none;
+  background:linear-gradient(180deg,transparent 0%,#ff6a00 30%,#ffb300 70%,transparent 100%);
+  transform:scaleY(0);transform-origin:center;
+  transition:transform 0.5s cubic-bezier(.22,1,.36,1) 0.5s;
+}
+#split.visible .divider{transform:scaleY(1);}
+
+/* VS pill */
+.vs {
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  z-index:20;
+  width:54px;height:54px;border-radius:50%;
+  background:#0f0a00;border:2px solid #ff6a00;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;
+  color:#ff6a00;letter-spacing:1px;
+  transition:transform 0.4s cubic-bezier(.34,1.56,.64,1) 0.7s;
+  pointer-events:none;
+}
+#split.visible .vs{transform:translate(-50%,-50%) scale(1);}
+
+/* Background particle dots */
+.bg-dots {
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,#ffffff08 1px,transparent 1px);
+  background-size:28px 28px;
+}
+
+/* Glow blobs */
+.blob {
+  position:absolute;border-radius:50%;
+  filter:blur(70px);pointer-events:none;opacity:0.18;
+}
+
+/* ── Half content ── */
+.half-inner {
+  position:relative;z-index:5;
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:2rem;gap:1rem;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 0.5s, transform 0.5s;
+}
+#split.visible .half-inner{ opacity:1;transform:translateY(0); }
+#street .half-inner{transition-delay:0.55s;}
+#home   .half-inner{transition-delay:0.65s;}
+
+.half-icon { font-size:clamp(4rem,8vw,6.5rem); line-height:1; animation:float 3.5s ease-in-out infinite; }
+#home .half-icon{animation-delay:-1.8s;}
+@keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
+
+.half-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2rem,4.5vw,3.8rem); letter-spacing:3px;line-height:1.05; }
+#street .half-title{color:#ff6a00;}
+#home   .half-title{color:#2aff6e;}
+
+.half-subtitle { font-family:'Tiro Devanagari Hindi',serif; font-style:italic; font-size:clamp(0.82rem,1.8vw,1rem); line-height:1.6;max-width:280px; }
+#street .half-subtitle{color:#ff6a00aa;}
+#home   .half-subtitle{color:#2aff6e88;}
+
+/* Tags */
+.tags { display:flex;flex-wrap:wrap;justify-content:center;gap:0.4rem; margin-top:0.25rem; }
+.tag { font-size:0.62rem;letter-spacing:1.5px; text-transform:uppercase;padding:0.22rem 0.65rem;border-radius:2px; }
+.tag-s{background:#ff6a0020;color:#ff6a00;border:1px solid #ff6a0044;}
+.tag-h{background:#2aff6e15;color:#2aff6e;border:1px solid #2aff6e33;}
+
+/* CTA button */
+.half-btn { margin-top:0.5rem; font-family:'Bebas Neue',sans-serif; font-size:1rem;letter-spacing:2px; padding:0.7rem 2rem;border-radius:3px;border:none; cursor:pointer; transition:transform 0.15s, filter 0.15s; }
+.half-btn:hover{transform:scale(1.05);filter:brightness(1.12);}
+#street .half-btn{background:#ff6a00;color:#0f0a00;}
+#home   .half-btn{background:#2aff6e;color:#001208;}
+
+/* Bottom tagline */
+.half-bottom { position:absolute;bottom:1.5rem;left:0;right:0; text-align:center; font-size:0.65rem;letter-spacing:2px;text-transform:uppercase; opacity:0; transition:opacity 0.4s 0.9s; }
+#split.visible .half-bottom{opacity:1;}
+#street .half-bottom{color:#ff6a0055;}
+#home   .half-bottom{color:#2aff6e44;}
+
+/* ─── REPLAY ─── */
+#replay { position:fixed;bottom:1.2rem;right:1.2rem;z-index:300; background:transparent;border:1px solid #ff6a0044; color:#ff6a0077;font-family:'Bebas Neue',sans-serif; font-size:0.82rem;letter-spacing:1px; padding:0.3rem 0.9rem;border-radius:3px; cursor:pointer;opacity:0; transition:opacity 0.3s, border-color 0.2s, color 0.2s; }
+#replay.show{opacity:1;}
+#replay:hover{border-color:#ff6a00;color:#ff6a00;}
+
+/* ─── NEXT PAGE hint ─── */
+.continue-hint { position:absolute;bottom:2.5rem; font-size:0.7rem;letter-spacing:2px;text-transform:uppercase; opacity:0;animation:blink 1.5s ease-in-out infinite; transition:opacity 0.4s 1.1s; }
+#split.visible .continue-hint{opacity:0.5;}
+#street .continue-hint{color:#ff6a00;}
+#home   .continue-hint{color:#2aff6e;}
+@keyframes blink{0%,100%{opacity:0.3;}50%{opacity:0.7;}}
+
+@media(max-width:600px){
+  #split{grid-template-columns:1fr;grid-template-rows:1fr 1fr;}
+  #street{transform:translateY(-100%);}
+  #home  {transform:translateY(100%);}
+  #split.visible #street{transform:translateY(0);}
+  #split.visible #home  {transform:translateY(0);}
+  .divider{top:50%;left:0;width:100%;height:2px; background:linear-gradient(90deg,transparent,#ff6a00,#ffb300,transparent);}
+  .vs{top:50%;left:50%;}
+}
+
+/* --- INFO SECTION --- */
+.info-section {
+  position: relative;
+  background: #0a0400;
+  z-index: 105;
+  padding: 6rem 2rem 0;
+  margin-top: -100vh; /* Adjusting gap for the extended sticky container */
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  box-shadow: 0 -20px 40px rgba(0,0,0,0.5);
+  color: #fff;
+}
+.info-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  padding-bottom: 4rem;
+}
+.info-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 3.5rem); color: #ff6a00; letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+.info-desc {
+  color: rgba(255,255,255,0.7);
+  font-size: 1.1rem; line-height: 1.6;
+  margin-bottom: 4rem;
+}
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; }
+.feature-card { background: rgba(255,106,0,0.05); border: 1px solid rgba(255,106,0,0.1); padding: 2rem; border-radius: 16px; transition: transform 0.2s; }
+.feature-card:hover { transform: translateY(-5px); background: rgba(255,106,0,0.1); }
+.feature-card h3 { color: #fff; font-size: 1.2rem; margin-bottom: 0.5rem; }
+.feature-card p { color: rgba(255,255,255,0.5); font-size: 0.9rem; line-height: 1.4; }
+
+/* ZOMATO STYLE FOOTER */
+.app-footer { background: #000; border-top: 1px solid rgba(255,106,0,0.2); padding: 3rem 1.5rem 2rem; margin-top: 3rem; text-align: center; }
+.footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #ff6a00; letter-spacing: 2px; line-height: 1; margin-bottom: 0.2rem; }
+.footer-iso { font-size: 0.65rem; color: rgba(255,106,0,0.6); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2rem; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+.footer-link { color: #fff; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+.footer-link:hover { color: #ff6a00; }
+.app-coming-soon { background: rgba(255,106,0,0.05); border: 1px dashed #ff6a00; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.app-coming-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: #ff6a00; letter-spacing: 1px; margin-bottom: 1rem; }
+.store-badges { display: flex; justify-content: center; gap: 1rem; }
+.store-badge { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.4rem; color: #fff; font-size: 0.8rem; font-weight: bold; opacity: 0.7; }
+.footer-bottom { font-size: 0.8rem; color: rgba(255,255,255,0.4); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; }
+</style>
+</head>
+<body>
+
+<!-- ZOMATO RED CURTAINS FOR ROUTING -->
+<div id="curtainTop"></div>
+<div id="curtainBot"></div>
+
+<!-- SPLASH INTRO (Zomato Mobile Rings) -->
+<div id="splash">
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="ring"></div>
+  <div class="splash-logo-wrap">
+    <div class="splash-logo">BHUKKAD</div>
+  </div>
+</div>
+
+<!-- STICKY DRIVEN SPLIT SCREEN -->
+<div class="hero-scroll-wrapper">
+  <div id="split">
+
+  <!-- Street side -->
+  <div class="half" id="street" onclick="goTo('street')">
+    <div class="bg-dots"></div>
+    <div class="blob" style="width:55vw;height:55vw;background:#ff6a00;top:-15%;left:-15%;"></div>
+    <div class="half-inner">
+      <div class="half-icon">🌶️</div>
+      <div class="half-title">NUKKAD KA<br>ZAYKA</div>
+      <div class="half-subtitle">Hawkers, thele, chaat corners —<br>sab seedha tumhare paas</div>
+      <div class="tags">
+        <span class="tag tag-s">Chaat</span>
+        <span class="tag tag-s">Seekh Kabab</span>
+        <span class="tag tag-s">Bhutte Ki Kees</span>
+        <span class="tag tag-s">Kachori</span>
+      </div>
+      <button class="half-btn">Explore →</button>
+    </div>
+    <div class="continue-hint">↑ tap to explore ↑</div>
+    <div class="half-bottom">Street food · hawkers · thele</div>
+  </div>
+
+  <!-- Home side -->
+  <div class="half" id="home" onclick="goTo('home')">
+    <div class="bg-dots"></div>
+    <div class="blob" style="width:55vw;height:55vw;background:#2aff6e;bottom:-15%;right:-15%;"></div>
+    <div class="half-inner">
+      <div class="half-icon">🍱</div>
+      <div class="half-title">GHAR KA<br>KHANA</div>
+      <div class="half-subtitle">Tiffin centers, dadi ki rasoi —<br>ghar jaisa swad, ghar tak</div>
+      <div class="tags">
+        <span class="tag tag-h">Dal Bafla</span>
+        <span class="tag tag-h">Poha</span>
+        <span class="tag tag-h">Malpua</span>
+        <span class="tag tag-h">Thali</span>
+      </div>
+      <button class="half-btn">Explore →</button>
+    </div>
+    <div class="continue-hint">↑ tap to explore ↑</div>
+    <div class="half-bottom">Tiffins · home kitchens · thalis</div>
+  </div>
+
+  <!-- Divider & VS -->
+  <div class="divider"></div>
+  <div class="vs">VS</div>
+
+  </div> <!-- End Split -->
+</div> <!-- End scroll wrapper -->
+
+<!-- INFO SECTION -->
+<section class="info-section">
+  <div class="info-content">
+    <h2 class="info-title">Bridging the Gap</h2>
+    <p class="info-desc">Discover the true taste of the streets, and the warmth of a home kitchen. Bhukkad brings verified street hawkers and passionate home-chefs directly to your doorstep with full transparency.</p>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">🌶️</div>
+        <h3>Street Verified</h3>
+        <p>Every thela and hawker is heavily quality tested before appearing on your feed.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">🍱</div>
+        <h3>Home Kitchens</h3>
+        <p>Authentic tiffins and meals cooked straight from verified local homes.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">🛵</div>
+        <h3>Lightning Fast</h3>
+        <p>Direct delivery ecosystem to preserve the ultimate freshness and crispness.</p>
+      </div>
+    </div>
+
+    <!-- Partner Registration Block -->
+    <div style="margin-top: 4rem; padding: 2.5rem 2rem; background: rgba(255,106,0,0.05); border: 1px dashed rgba(255,106,0,0.5); border-radius: 16px;">
+      <h3 style="font-family:'Bebas Neue',sans-serif; font-size: 2rem; color: #ff6a00; letter-spacing: 1px; margin-bottom: 0.5rem;">PARTNER WITH BHUKKAD</h3>
+      <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5;">Turn your culinary passion or driving skills into earnings. Join our growing community of hawkers, home chefs, and delivery fleet.</p>
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <button class="half-btn" style="background:#ff6a00; color:#0f0a00; margin:0;" onclick="window.location.href='partner.html?role=hawker'">Hawker / Kitchen Portal</button>
+        <button class="half-btn" style="background:transparent; border: 1px solid #ff6a00; color:#ff6a00; margin:0;" onclick="window.location.href='partner.html?role=delivery'">Delivery Partner Portal</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ZOMATO STYLE FOOTER -->
+  <footer class="app-footer">
+    <div class="footer-logo">BHUKKAD</div>
+    <div class="footer-iso">An ISO 9001:2015 Certified Platform</div>
+    
+    <div class="footer-links">
+      <a href="#" class="footer-link">About Us</a>
+      <a href="#" class="footer-link">Contact</a>
+      <a href="#" class="footer-link">Terms & Conditions</a>
+      <a href="#" class="footer-link">Privacy Policy</a>
+      <a href="#" class="footer-link">Refund Policy</a>
+    </div>
+
+    <!-- Get the App mock -->
+    <div class="app-coming-soon">
+      <div class="app-coming-title">MOBILE APP COMING SOON</div>
+      <p style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-bottom:1rem;">We're working hard to bring the Bhukkad experience to your home screen.</p>
+      <div class="store-badges">
+        <div class="store-badge">🍏 App Store</div>
+        <div class="store-badge">▶️ Google Play</div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      &copy; 2026 Bhukkad Technologies Bhopal .
+       Made By Lalit Kumar Patel
+    </div>
+  </footer>
+</section>
+
+<!-- PROFILE BADGE -->
+<div id="profileBadge" style="
+  position:fixed;top:1.5rem;right:1.5rem;z-index:250;
+  display:none;align-items:center;gap:0.5rem;
+  background:rgba(255,106,0,0.1);border:1px solid rgba(255,106,0,0.3);
+  padding:0.4rem 1rem;border-radius:30px;backdrop-filter:blur(10px);
+  font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#fff;
+  opacity:0;transition:opacity 0.4s;
+">
+  <span style="font-size:1.1rem;">👤</span>
+  <span>Hi, <b id="profileName" style="color:#ff6a00;">User</b></span>
+  <button onclick="logout()" style="
+    background:transparent;border:none;color:#ff6a00aa;
+    margin-left:0.5rem;cursor:pointer;font-size:0.75rem;
+    text-transform:uppercase;letter-spacing:1px;
+    border-left:1px solid rgba(255,106,0,0.3);padding-left:0.5rem;
+  ">Exit</button>
+</div>
+
+<button id="replay" onclick="runAll()">↺ Replay</button>
+
+<script>
+let currentUser = null;
+try {
+  currentUser = localStorage.getItem('bhukkad_user');
+} catch(e) { console.warn('LocalStorage unavailable'); }
+
+const splash   = document.getElementById('splash');
+const split    = document.getElementById('split');
+const cTop     = document.getElementById('curtainTop');
+const cBot     = document.getElementById('curtainBot');
+const replayBtn= document.getElementById('replay');
+
+function runAll() {
+  // Reset states
+  replayBtn.classList.remove('show');
+  split.classList.remove('visible');
+  cTop.className=''; cBot.className='';
+  cTop.style.height='0'; cBot.style.height='0';
+  
+  // 1) Show splash logo sequence (Zomato Mobile Rings)
+  splash.style.display = 'flex';
+  splash.style.opacity = '1';
+  
+  // Restart logo animation
+  const logoWrap = splash.querySelector('.splash-logo-wrap');
+  const clone = logoWrap.cloneNode(true);
+  splash.replaceChild(clone, logoWrap);
+  
+  // Restart background rings
+  const rings = splash.querySelectorAll('.ring');
+  rings.forEach(r => {
+    r.style.animation = 'none';
+    r.offsetHeight; 
+    r.style.animation = null; 
+  });
+
+  // 2) Close Zomato Red curtains
+  setTimeout(() => {
+    cTop.classList.add('open');
+    cBot.classList.add('open');
+  }, 1400);
+
+  // 3) Hide splash, reveal split, then wipe curtains open
+  setTimeout(() => {
+    splash.style.opacity = '0';
+    setTimeout(() => { splash.style.display='none'; }, 500);
+    
+    split.classList.add('visible');
+    // Ensure parallax reset
+    split.style.transform = 'scale(1)'; 
+    split.style.borderRadius = '0px';
+
+    cTop.classList.add('close');
+    cBot.classList.add('close');
+    
+    // Show replay
+    setTimeout(() => {
+      replayBtn.classList.add('show');
+    }, 1200);
+
+  }, 1900);
+}
+
+// ZOMATO RED WIPE TRANSITION TO NEXT PAGE
+function goTo(choice) {
+  const targetPage = choice === 'street' ? 'nukkad_ka_zayaka.html' : 'ghar_ka_khana.html';
+  
+  cTop.style.transition='height 0.4s cubic-bezier(.77,0,.18,1)';
+  cBot.style.transition='height 0.4s cubic-bezier(.77,0,.18,1)';
+  cTop.style.height='50%';
+  cBot.style.height='50%';
+
+  setTimeout(() => {
+    if (currentUser) {
+      window.location.href = targetPage;
+    } else {
+      window.location.href = 'login.html?redirect=' + targetPage;
+    }
+  }, 450);
+}
+
+const profileBadge = document.getElementById('profileBadge');
+const profileName = document.getElementById('profileName');
+
+function checkSession() {
+  if (currentUser) {
+    profileName.innerText = currentUser.split(' ')[0]; // First name
+    profileBadge.style.display = 'flex';
+    setTimeout(()=>{profileBadge.style.opacity = '1';}, 100);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('bhukkad_user');
+  window.location.href = 'landingpage.html';
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('login_success') === '1') {
+  splash.style.display = 'none';
+  split.classList.add('visible');
+  replayBtn.classList.add('show');
+  checkSession();
+} else {
+  runAll();
+  setTimeout(checkSession, 2200);
+}
+
+// Parallax zoom out logic for the sticky split screen
+window.addEventListener('scroll', () => {
+  if (split.classList.contains('visible')) {
+    const scrollY = window.scrollY;
+    // Over the course of 150vh, scale down to 0.75
+    const progress = Math.min(scrollY / (window.innerHeight * 1.5), 1);
+    
+    const scale = 1 - (progress * 0.25); // 1 to 0.75
+    const radius = progress * 40; // 0 to 40px
+    
+    split.style.transform = `scale(${scale})`;
+    split.style.borderRadius = `${radius}px`;
+    split.style.filter = `brightness(${1 - progress * 0.4})`;
+  }
+});
+</script>
+</body>
+</html>
