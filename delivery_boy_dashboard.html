@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Boy Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; margin: auto; }
+        header { background: #007BFF; color: white; padding: 10px 0; text-align: center; }
+        nav { margin: 20px 0; }
+        nav a { margin: 0 15px; text-decoration: none; color: #007BFF; }
+        footer { text-align: center; margin-top: 20px; }
+        .card { border: 1px solid #ddd; border-radius: 5px; padding: 20px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Delivery Boy Dashboard</h1>
+    </header>
+    <nav>
+        <a href="#orders">Order Management</a>
+        <a href="#earnings">Earnings Tracking</a>
+        <a href="#delivery">Real-Time Delivery</a>
+    </nav>
+    <div class="container">
+        <div class="card" id="orders">
+            <h2>Order Management</h2>
+            <p>Manage your deliveries efficiently. View, accept or decline orders here.</p>
+            <ul>
+                <li>Order ID: #12345 - $15.99 - <button>Accept</button> <button>Decline</button></li>
+                <li>Order ID: #12346 - $37.49 - <button>Accept</button> <button>Decline</button></li>
+            </ul>
+        </div>
+        <div class="card" id="earnings">
+            <h2>Earnings Tracking</h2>
+            <p>Your earnings for this week:</p>
+            <p>Total Earnings: $153.75</p>
+            <p>Pending Payments: $45.00</p>
+        </div>
+        <div class="card" id="delivery">
+            <h2>Real-Time Delivery Tracking</h2>
+            <p>Track your current deliveries in real-time.</p>
+            <div id="map">
+                <p>[Map showing delivery route goes here]</p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2026 Bhukad Delivery Services</p>
+    </footer>
+</body>
+</html>
